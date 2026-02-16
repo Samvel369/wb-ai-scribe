@@ -27,7 +27,9 @@ body {
   .text-gradient {
     background: linear-gradient(to right, #c084fc, #e879f9);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
+    color: transparent;
   }
 
   .glass-card {
