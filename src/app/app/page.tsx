@@ -152,13 +152,16 @@ export default function App() {
 
             const data = await response.json();
 
-            // Simulate typing effect for "AI" feel
+            // Simulate typing effect for "AI" feel (Faster)
             const text = data.description;
             let i = 0;
             const interval = setInterval(() => {
                 setResult((prev) => text.slice(0, i + 1));
-                i++;
-                if (i >= text.length) clearInterval(interval);
+                i += 10; // Speed up: 10 chars per tick instead of 1
+                if (i >= text.length) {
+                    setResult(text);
+                    clearInterval(interval);
+                }
             }, 5); // Speed of typing
 
             // Обновляем историю и счетчик после успешной генерации
@@ -204,14 +207,14 @@ export default function App() {
                         <p className="text-zinc-400 mb-6 text-sm text-center">
                             Вы использовали все бесплатные генерации на сегодня (3 шт).
                             <br />
-                            Приходите завтра или перейдите на PRO.
+                            Приходите завтра или перейдите на Premium.
                         </p>
                         <div className="flex gap-3 flex-col">
                             <Link
                                 href="/pricing"
                                 className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-center hover:opacity-90 transition"
                             >
-                                Перейти на PRO
+                                Перейти на Premium
                             </Link>
                             <button
                                 onClick={() => setShowLimitModal(false)}
@@ -262,6 +265,14 @@ export default function App() {
                 </div>
                 {user && (
                     <div className="flex items-center gap-4">
+                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition ${isPremium
+                            ? "bg-purple-900/50 border-purple-500/50 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.3)]"
+                            : "bg-white/5 border-white/10 text-zinc-500"
+                            }`}>
+                            <Sparkles className={`w-3 h-3 ${isPremium ? "text-purple-400 fill-purple-400" : "text-zinc-600"}`} />
+                            <span className={isPremium ? "text-purple-100" : "text-zinc-600"}>Premium</span>
+                        </div>
+
                         <Link
                             href="/pricing"
                             className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-900/50 to-purple-800/50 border border-purple-500/30 hover:border-purple-500/60 transition text-xs font-medium text-purple-200"

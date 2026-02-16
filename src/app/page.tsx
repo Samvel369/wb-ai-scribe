@@ -163,9 +163,8 @@ export default function Home() {
             </div>
 
             {/* Pro Plan */}
-            <div className="glass-card p-8 rounded-2xl flex flex-col border-purple-500/50 relative overflow-hidden">
-              <div className="absolute top-0 right-0 px-4 py-1 bg-purple-600 text-xs font-bold rounded-bl-xl">POPULAR</div>
-              <h3 className="text-xl font-bold mb-2">PRO Селлер</h3>
+            <div className="glass-card p-8 rounded-2xl flex flex-col border-purple-500/50 relative overflow-hidden group hover:border-purple-500/80 transition duration-300">
+              <h3 className="text-xl font-bold mb-2">Premium</h3>
               <div className="text-3xl font-bold mb-6">990 ₽ <span className="text-sm font-normal text-zinc-500">/ мес</span></div>
               <ul className="space-y-4 mb-8 flex-1">
                 <li className="flex items-center gap-2 text-white">
@@ -174,19 +173,19 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2 text-white">
                   <Sparkles className="w-4 h-4 text-purple-400" />
-                  SEO-аналитика
+                  GPT-4o Mini (Умнее и быстрее)
                 </li>
                 <li className="flex items-center gap-2 text-white">
                   <Sparkles className="w-4 h-4 text-purple-400" />
-                  Поддержка WB и Ozon
+                  Поддержка
                 </li>
               </ul>
-              <button
+              <Link
+                href="/pricing"
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold text-center hover:opacity-90 transition shadow-lg shadow-purple-900/20"
-                onClick={() => alert('Оплата будет доступна после запуска!')} // Mock payment
               >
                 Подключить PRO
-              </button>
+              </Link>
             </div>
           </div>
         </div>

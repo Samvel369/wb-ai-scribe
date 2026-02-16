@@ -4,10 +4,10 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
 // Инициализация клиента
-// Используем переменную окружения AI_BASE_URL для переключения между провайдерами (OpenAI, VseGPT, ProxyAPI)
+// Используем переменную окружения OPENAI_BASE_URL для перечеключения между провайдерами (OpenAI, VseGPT, ProxyAPI)
 const openai = new OpenAI({
-    apiKey: process.env.AI_API_KEY || "dummy",
-    baseURL: process.env.AI_BASE_URL || "https://api.openai.com/v1",
+    apiKey: process.env.OPENAI_API_KEY || "dummy",
+    baseURL: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1",
 });
 
 export async function POST(req: Request) {
@@ -21,9 +21,13 @@ export async function POST(req: Request) {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError || !session) {
-            // Если нет сессии и не демо режим - ошибка
-            if (!process.env.AI_API_KEY || process.env.AI_API_KEY === "dummy") {
-                // Demo mode logic continues below...
+            // Если нет сессии и не демо режим (проверяем по наличию реального ключа)
+            if (!process.env.OPENAI_API_KEY) {
+                // Если ключа нет, то это демо режим без авторизации (теоретически)
+                // Но у нас логика завязана на пользователях.
+                // Если мы хотим пускать гостей - это отдельная история.
+                // Пока считаем что без ключа и без сессии - нельзя.
+                return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
             } else {
                 return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
             }
@@ -59,13 +63,25 @@ export async function POST(req: Request) {
         // Логика поддневного лимита
         const FREE_LIMIT = 3;
 
-        if (userId && profile && !profile.is_premium) {
+        // Если пользователь Premium, пропускаем проверку лимитов
+        const isPremium = profile?.is_premium === true;
+
+        if (userId && profile && !isPremium) {
             const now = new Date();
             const lastReset = profile.last_reset_at ? new Date(profile.last_reset_at) : new Date(0);
 
-            // Сбрасываем счетчик, если наступил новый день (по UTC или локальному времени сервера)
-            // Простое сравнение по дате
-            if (now.toDateString() !== lastReset.toDateString()) {
+            // Логирование для отладки
+            console.log("Checking limits for user:", userId);
+            console.log("Current time (UTC):", now.toISOString());
+            console.log("Last reset (UTC):", lastReset.toISOString());
+            console.log("Current Count:", profile.generation_count);
+
+            // Сравниваем только дату (YYYY-MM-DD) в UTC
+            const isSameDay = now.toISOString().split('T')[0] === lastReset.toISOString().split('T')[0];
+            console.log("Is same day (UTC):", isSameDay);
+
+            if (!isSameDay) {
+                console.log("Resetting daily limit...");
                 const { error: resetError } = await supabase
                     .from('profiles')
                     .update({ generation_count: 0, last_reset_at: now.toISOString() })
@@ -73,10 +89,16 @@ export async function POST(req: Request) {
 
                 if (!resetError) {
                     profile.generation_count = 0;
+                    console.log("Limit reset successful");
+                } else {
+                    console.error("Error resetting limit:", resetError);
                 }
+            } else {
+                console.log("Limit update not required");
             }
 
             if (profile.generation_count >= FREE_LIMIT) {
+                console.log("Limit reached!");
                 return NextResponse.json(
                     { error: "Limit reached", limitReached: true },
                     { status: 403 }
@@ -84,25 +106,14 @@ export async function POST(req: Request) {
             }
         }
 
-        // Проверка логики: Если ключ не установлен или равен 'dummy', возвращаем демо-ответ
-        if (!process.env.AI_API_KEY || process.env.AI_API_KEY === "dummy") {
-            // ... existing demo logic ...
-            // Имитация задержки для реалистичности
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-            const mockDescription = generateMockDescription(name, features, marketplace);
-
-            // Попытка сохранить даже демо-результат
-            if (userId) {
-                await Promise.all([
-                    saveToHistory(name, features, marketplace, tone, mockDescription),
-                    supabase.rpc('increment_generation_count', { user_id: userId })
-                ]);
-            }
-
-            return NextResponse.json({
-                description: mockDescription,
-                isMock: true
-            });
+        // Проверка логики: Если ключ не установлен, возвращаем ошибку (демо режим "без ключа" убираем, так как юзер хочет рабочий сервис)
+        // Или оставляем демо-заглушку если ключа реально нет?
+        // Юзер просил исправить ключ. Используем OPENAI_API_KEY.
+        if (!process.env.OPENAI_API_KEY) {
+            return NextResponse.json(
+                { error: "Server misconfigured: OPENAI_API_KEY missing" },
+                { status: 500 }
+            );
         }
 
 
@@ -143,14 +154,21 @@ export async function POST(req: Request) {
 
         // 4. Сохраняем в историю и обновляем счетчик
         if (userId) {
-            await Promise.all([
-                saveToHistory(name, features, marketplace, tone, description),
-                supabase.rpc('increment_generation_count', { user_id: userId })
-            ]);
+            // Сохраняем генерацию
+            await saveToHistory(name, features, marketplace, tone, description);
+
+            // Если НЕ премиум, увеличиваем счетчик
+            if (!isPremium) {
+                const { error: rpcError } = await supabase.rpc('increment_generation_count', { user_id: userId });
+                if (rpcError) {
+                    console.error("Error incrementing count:", rpcError);
+                    // Можно решить, блокировать ли выдачу результата, если счетчик не обновился. 
+                    // Обычно лучше отдать результат, но залогировать проблему.
+                }
+            }
         }
 
         return NextResponse.json({ description, isMock: false });
-
 
     } catch (error) {
         console.error("AI Error:", error);
