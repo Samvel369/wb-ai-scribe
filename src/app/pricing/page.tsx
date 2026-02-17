@@ -97,9 +97,9 @@ export default function PricingPage() {
                     </div>
 
                     {/* PRO Plan */}
-                    <div className="glass-card p-8 rounded-3xl border border-purple-500/30 relative flex flex-col hover:border-purple-500/50 transition duration-300 shadow-2xl shadow-purple-900/10 group">
+                    <div className="glass-card p-8 rounded-3xl border border-blue-500/30 relative flex flex-col hover:border-fuchsia-500/50 transition duration-300 shadow-2xl shadow-blue-900/10 group">
                         {cycle === '1y' && (
-                            <div className="absolute -top-4 right-8 bg-purple-600 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase shadow-lg flex items-center gap-1">
+                            <div className="absolute -top-4 right-8 bg-fuchsia-600 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase shadow-lg flex items-center gap-1">
                                 <Zap className="w-3 h-3 fill-current" />
                                 ХИТ ПРОДАЖ
                             </div>
@@ -131,20 +131,20 @@ export default function PricingPage() {
 
                         <ul className="space-y-4 mb-8 flex-1">
                             <li className="flex items-center gap-3 text-zinc-200">
-                                <div className="p-1 rounded-full bg-purple-500/20">
-                                    <Sparkles className="w-3 h-3 text-purple-400" />
+                                <div className="p-1 rounded-full bg-blue-500/20">
+                                    <Sparkles className="w-3 h-3 text-blue-400" />
                                 </div>
                                 <span>Безлимитные генерации</span>
                             </li>
                             <li className="flex items-center gap-3 text-zinc-200">
-                                <div className="p-1 rounded-full bg-purple-500/20">
-                                    <Sparkles className="w-3 h-3 text-purple-400" />
+                                <div className="p-1 rounded-full bg-blue-500/20">
+                                    <Sparkles className="w-3 h-3 text-blue-400" />
                                 </div>
                                 <span><b>GPT-4o Mini</b> (Умнее и быстрее)</span>
                             </li>
                             <li className="flex items-center gap-3 text-zinc-200">
-                                <div className="p-1 rounded-full bg-purple-500/20">
-                                    <Sparkles className="w-3 h-3 text-purple-400" />
+                                <div className="p-1 rounded-full bg-blue-500/20">
+                                    <Sparkles className="w-3 h-3 text-blue-400" />
                                 </div>
                                 <span>Поддержка</span>
                             </li>
@@ -152,7 +152,7 @@ export default function PricingPage() {
 
                         <button
                             onClick={() => handleSubscribe('pro')}
-                            className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 transition font-bold text-white shadow-lg shadow-purple-900/30 group-hover:scale-[1.02] transform duration-200"
+                            className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 to-fuchsia-600 hover:opacity-90 transition font-bold text-white shadow-lg shadow-blue-900/30 group-hover:scale-[1.02] transform duration-200"
                         >
                             Подключить PRO
                         </button>

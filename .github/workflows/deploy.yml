@@ -1,0 +1,23 @@
+name: Deploy to Timeweb
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /root/wb-ai-scribe
+            git pull
+            # Передаем переменные окружения, чтобы они точно подхватились
+            export HOSTNAME="0.0.0.0"
+            export PORT=3000
+            docker-compose up -d --build

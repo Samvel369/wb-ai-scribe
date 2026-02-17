@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "WB.Scribe - AI SEO for Wildberries & Ozon",
-  description: "Generate SEO-optimized product descriptions in seconds.",
+  title: "AiSellerPro - AI SEO для Wildberries & Ozon",
+  description: "Генерация продающих SEO-описаний для маркетплейсов за 10 секунд.",
 };
 
 export default function RootLayout({

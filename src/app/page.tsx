@@ -10,10 +10,10 @@ export default function Home() {
       <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#0a0a0a]/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-xl tracking-tight">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-fuchsia-600 flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            WB.Scribe
+            AiSellerPro
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm text-zinc-400">
             <Link href="#features" className="hover:text-white transition">Возможности</Link>
@@ -31,7 +31,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-4">
         {/* Background Gradients */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-purple-600/20 rounded-full blur-[120px] -z-10" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] -z-10" />
 
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-purple-300 mb-4">
@@ -55,7 +55,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link
               href="/app"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold text-lg hover:opacity-90 transition flex items-center justify-center gap-2 shadow-lg shadow-purple-900/20"
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white font-bold text-lg hover:opacity-90 transition flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20"
             >
               <Zap className="w-5 h-5 fill-current" />
               Попробовать бесплатно
@@ -182,7 +182,7 @@ export default function Home() {
               </ul>
               <Link
                 href="/pricing"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold text-center hover:opacity-90 transition shadow-lg shadow-purple-900/20"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white font-bold text-center hover:opacity-90 transition shadow-lg shadow-blue-900/20"
               >
                 Подключить PRO
               </Link>
@@ -193,7 +193,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="py-8 border-t border-white/5 text-center text-zinc-600 text-sm">
-        <p>&copy; 2024 WB.Scribe. Все права защищены.</p>
+        <p>&copy; 2026 AiSellerPro. Все права защищены.</p>
       </footer>
     </div>
   );
