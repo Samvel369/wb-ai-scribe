@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: wb-ai-scribe
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=production
+    networks:
+      - wb-scribe-net
+
+networks:
+  wb-scribe-net:
+    driver: bridge
