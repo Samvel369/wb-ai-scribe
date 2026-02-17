@@ -20,4 +20,6 @@ jobs:
             # Передаем переменные окружения, чтобы они точно подхватились
             export HOSTNAME="0.0.0.0"
             export PORT=3000
+            # Сначала останавливаем и удаляем старые контейнеры, чтобы избежать ошибки ContainerConfig (баг старого docker-compose)
+            docker-compose down || true
             docker-compose up -d --build
