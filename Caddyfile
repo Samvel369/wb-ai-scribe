@@ -1,0 +1,7 @@
+aisellerpro.ru {
+    reverse_proxy app:3000
+}
+
+www.aisellerpro.ru {
+    redir https://aisellerpro.ru{uri}
+}
