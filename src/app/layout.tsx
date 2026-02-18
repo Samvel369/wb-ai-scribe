@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ru">
+    <html lang="ru" suppressHydrationWarning>
       <body className={`font-sans min-h-screen flex flex-col bg-[#0a0a0a]`}>
         <main className="flex-grow">
           {children}

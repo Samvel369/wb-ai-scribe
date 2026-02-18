@@ -1,15 +1,10 @@
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import * as fs from 'fs';
-
-function logToFile(msg: string) {
-    // Basic file logging for debug
-    // In Edge middleware fs might not work directly, but let's try or use console if fails.
-    // Actually middleware runs on Edge runtime usually, fs is not available.
-    // So this might break middleware. 
-    console.log(msg);
-}
+// Basic file logging for debug
+// In Edge middleware fs might not work directly, but let's try or use console if fails.
+// Actually middleware runs on Edge runtime usually, fs is not available.
+// So this might break middleware. 
 
 export async function middleware(req: NextRequest) {
     const res = NextResponse.next()
@@ -40,5 +35,8 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/app/:path*', '/login'],
+    matcher: [
+        '/app/:path*',
+        '/login'
+    ],
 }
