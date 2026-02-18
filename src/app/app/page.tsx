@@ -182,7 +182,7 @@ export default function App() {
         };
 
         setupSession();
-    }, [user, supabase, currentSessionId, router]);
+    }, [user?.id, supabase, currentSessionId, router]);
 
 
     const handleLogout = async () => {
