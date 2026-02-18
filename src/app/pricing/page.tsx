@@ -22,8 +22,29 @@ export default function PricingPage() {
         if (plan === 'free') {
             router.push('/app');
         } else {
-            alert(`Подключение тарифа на ${TARIFFS[cycle].label} (ID: ${cycle}) в процесссе...`);
-            // TODO: Pay with RoboKassa
+            try {
+                // Call API to get payment URL
+                const response = await fetch('/api/payment/init', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ plan: cycle }) // '1m', '3m', etc.
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.url) {
+                        window.location.href = data.url;
+                    } else {
+                        alert('Ошибка: не получена ссылка на оплату');
+                    }
+                } else {
+                    const error = await response.json();
+                    alert(`Ошибка: ${error.error || 'Неизвестная ошибка'}`);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Произошла ошибка при инициализации оплаты');
+            }
         }
     };
 
