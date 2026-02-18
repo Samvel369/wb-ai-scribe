@@ -93,20 +93,20 @@ export default function Home() {
             Почему селлеры выбирают нас?
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="flex flex-wrap justify-center gap-8">
             {/* Feature 1 */}
-            <div className="glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
+            <div className="w-full md:w-[30%] glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
               <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
                 <TrendingUp className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold">SEO-оптимизация</h3>
               <p className="text-zinc-400 leading-relaxed">
-                Алгоритм автоматически вставляет высокочастотные ключи, чтобы товар попал в топ выдачи WB и Ozon.
+                Алгоритм автоматически вставляет высокочастотные ключи, чтобы товар попал в топ выдачи маркетплейсов.
               </p>
             </div>
 
             {/* Feature 2 */}
-            <div className="glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
+            <div className="w-full md:w-[30%] glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
               <div className="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400">
                 <Zap className="w-6 h-6" />
               </div>
@@ -117,13 +117,65 @@ export default function Home() {
             </div>
 
             {/* Feature 3 */}
-            <div className="glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
+            <div className="w-full md:w-[30%] glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
               <div className="w-12 h-12 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-400">
                 <Sparkles className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold">Продающий стиль</h3>
               <p className="text-zinc-400 leading-relaxed">
                 Тексты пишутся по формуле AIDA, закрывая боли клиента и побуждая к покупке.
+              </p>
+            </div>
+
+            {/* Feature 4 */}
+            <div className="w-full md:w-[30%] glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
+              <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center text-green-400">
+                {/* Using a generic icon for multi-platform */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-6 h-6"
+                >
+                  <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                  <polyline points="2 17 12 22 22 17" />
+                  <polyline points="2 12 12 17 22 12" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold">6 популярных платформ</h3>
+              <p className="text-zinc-400 leading-relaxed">
+                Генерируйте контент для популярных площадок электронной коммерции и мессенджеров в одном окне.
+              </p>
+            </div>
+
+            {/* Feature 5 */}
+            <div className="w-full md:w-[30%] glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
+              <div className="w-12 h-12 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-6 h-6"
+                >
+                  <path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z" />
+                  <path d="M10 2c1 .5 2 2 2 5" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold">Human-like текст</h3>
+              <p className="text-zinc-400 leading-relaxed">
+                Нейросеть пишет живым, естественным языком, который неотличим от текста, написанного профессиональным копирайтером.
               </p>
             </div>
           </div>
@@ -189,10 +241,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 border-t border-white/5 text-center text-zinc-600 text-sm">
-        <p>&copy; 2026 AiSellerPro. Все права защищены.</p>
-      </footer>
+
     </div>
   );
 }

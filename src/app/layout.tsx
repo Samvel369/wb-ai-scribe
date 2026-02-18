@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import Footer from '@/components/Footer'
 
 export const metadata: Metadata = {
-  title: "AiSellerPro - AI SEO для Wildberries & Ozon",
-  description: "Генерация продающих SEO-описаний для маркетплейсов за 10 секунд.",
+  title: 'AI Seller - Генератор описаний',
+  description: 'Генерация продающих описаний для маркетплейсов с помощью AI',
 };
 
 export default function RootLayout({
@@ -16,7 +14,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      <body className={inter.className}>{children}</body>
+      <body className={`font-sans min-h-screen flex flex-col bg-[#0a0a0a]`}>
+        <main className="flex-grow">
+          {children}
+        </main>
+        <Footer />
+      </body>
     </html>
   );
 }

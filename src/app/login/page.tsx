@@ -76,10 +76,11 @@ export default function Login() {
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center p-4">
+            <Link href="/" className="fixed top-8 left-8 p-3 rounded-full bg-white/5 hover:bg-white/10 transition text-zinc-400 hover:text-white z-50 backdrop-blur-md border border-white/5">
+                <ArrowLeft className="w-6 h-6" />
+            </Link>
+
             <div className="w-full max-w-md space-y-8">
-                <Link href="/" className="inline-flex items-center text-zinc-400 hover:text-white transition gap-2 mb-8">
-                    <ArrowLeft className="w-4 h-4" /> Назад на главную
-                </Link>
 
                 <div className="glass-card p-8 rounded-2xl border border-white/10 relative overflow-hidden">
                     <div className="text-center mb-8">
@@ -200,6 +201,13 @@ export default function Login() {
                     </div>
                 </div>
             </div>
-        </div>
+
+
+            <div className="mt-8">
+                <Link href="/" className="inline-flex items-center text-zinc-500 hover:text-white transition gap-2 px-4 py-2 rounded-lg hover:bg-white/5">
+                    <ArrowLeft className="w-4 h-4" /> Назад на главную
+                </Link>
+            </div>
+        </div >
     );
 }

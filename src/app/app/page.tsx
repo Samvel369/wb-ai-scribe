@@ -47,6 +47,7 @@ export default function App() {
         { id: 'avito', label: 'Avito' },
         { id: 'instagram', label: 'Instagram' },
         { id: 'telegram', label: 'Telegram' },
+        { id: 'max', label: 'MAX' },
     ];
 
     const [isToneOpen, setIsToneOpen] = useState(false);
