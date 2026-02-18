@@ -26,11 +26,15 @@ export default function Footer() {
                     <p>ИНН: 860104707764</p>
                     <p>Email: <a href="mailto:ai-sellerpro@yandex.ru" className="hover:text-zinc-400 transition">ai-sellerpro@yandex.ru</a></p>
                     <p>Тел: +7 982 566-58-46</p>
-                    <p className="text-[10px] text-zinc-700 mt-2 leading-tight">
-                        Оплата происходит через ПАО Сбербанк с использованием банковских карт следующих платёжных систем: МИР, VISA, Mastercard Worldwide, JCB.
-                    </p>
+
                 </div>
 
+            </div>
+
+            <div className="max-w-[1200px] mx-auto px-4 mt-8 pt-4 border-t border-white/5 text-center">
+                <p className="text-[10px] text-zinc-700">
+                    Сервис предоставляет доступ к ПО для автоматической генерации текстов. Не является гарантией продаж. Безопасность платежей обеспечивается с помощью Банка-эквайера.
+                </p>
             </div>
         </footer>
     );

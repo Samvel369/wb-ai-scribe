@@ -51,8 +51,8 @@ export default function Home() {
           </h1>
 
           <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto">
-            Искусственный интеллект, который знает алгоритмы маркетплейсов.
-            Повышаем позиции в поиске и увеличиваем конверсию в корзину.
+            Искусственный интеллект, оптимизированный для алгоритмов маркетплейсов.
+            Создаем контент для повышения позиций в поиске и конверсии в корзину.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -72,16 +72,16 @@ export default function Home() {
       <section className="py-10 border-y border-white/5 bg-white/[0.02]">
         <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-center gap-12 md:gap-24 text-center">
           <div>
-            <div className="text-3xl font-bold text-white">2.5x</div>
-            <div className="text-sm text-zinc-500 uppercase tracking-wider mt-1">Рост продаж</div>
+            <div className="text-3xl font-bold text-white">~10 сек</div>
+            <div className="text-sm text-zinc-500 uppercase tracking-wider mt-1">На одно описание</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-white">10k+</div>
-            <div className="text-sm text-zinc-500 uppercase tracking-wider mt-1">Описаний создано</div>
+            <div className="text-3xl font-bold text-white">99%</div>
+            <div className="text-sm text-zinc-500 uppercase tracking-wider mt-1">Уникальность текста</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-white">Top 1</div>
-            <div className="text-sm text-zinc-500 uppercase tracking-wider mt-1">В своей категории</div>
+            <div className="text-3xl font-bold text-white">6</div>
+            <div className="text-sm text-zinc-500 uppercase tracking-wider mt-1">Популярных площадок</div>
           </div>
         </div>
       </section>
@@ -101,7 +101,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold">SEO-оптимизация</h3>
               <p className="text-zinc-400 leading-relaxed">
-                Алгоритм автоматически вставляет высокочастотные ключи, чтобы товар попал в топ выдачи маркетплейсов.
+                Алгоритм автоматически использует высокочастотные ключи для улучшения ранжирования и видимости товара.
               </p>
             </div>
 
