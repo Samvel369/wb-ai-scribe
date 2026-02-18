@@ -15,16 +15,19 @@ export default function Home() {
             </div>
             AiSellerPro
           </div>
-          <div className="hidden md:flex items-center gap-6 text-sm text-zinc-400">
-            <Link href="#features" className="hover:text-white transition">Возможности</Link>
-            <Link href="#pricing" className="hover:text-white transition">Цены</Link>
+
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex items-center gap-6 text-sm text-zinc-400">
+              <Link href="#features" className="hover:text-white transition">Возможности</Link>
+              <Link href="#pricing" className="hover:text-white transition">Цены</Link>
+            </div>
+            <Link
+              href="/login"
+              className="px-4 py-2 rounded-full bg-white text-black text-sm font-medium hover:bg-zinc-200 transition"
+            >
+              Войти
+            </Link>
           </div>
-          <Link
-            href="/login"
-            className="px-4 py-2 rounded-full bg-white text-black text-sm font-medium hover:bg-zinc-200 transition"
-          >
-            Войти
-          </Link>
         </div>
       </nav>
 
@@ -34,12 +37,12 @@ export default function Home() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] -z-10" />
 
         <div className="max-w-4xl mx-auto text-center space-y-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-purple-300 mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-blue-300 mb-4">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </span>
-            Доступно для Wildberries и Ozon
+            Специально для селлеров маркетплейсов
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight">
@@ -60,12 +63,7 @@ export default function Home() {
               <Zap className="w-5 h-5 fill-current" />
               Попробовать бесплатно
             </Link>
-            <Link
-              href="#demo"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl glass-card text-white hover:bg-white/5 transition font-medium"
-            >
-              Смотреть демо
-            </Link>
+
           </div>
         </div>
       </section>
@@ -83,7 +81,7 @@ export default function Home() {
           </div>
           <div>
             <div className="text-3xl font-bold text-white">Top 1</div>
-            <div className="text-sm text-zinc-500 uppercase tracking-wider mt-1">В категории Tools</div>
+            <div className="text-sm text-zinc-500 uppercase tracking-wider mt-1">В своей категории</div>
           </div>
         </div>
       </section>

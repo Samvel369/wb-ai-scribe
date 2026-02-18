@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Copy, Loader2, Sparkles, ArrowLeft, LogOut, User as UserIcon, History, ChevronRight, Trash2 } from "lucide-react";
+import { Copy, Loader2, Sparkles, ArrowLeft, LogOut, User as UserIcon, History, ChevronRight, Trash2, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { User } from "@supabase/supabase-js";
@@ -27,6 +27,7 @@ export default function App() {
     const [showLimitModal, setShowLimitModal] = useState(false);
 
     const [isPremium, setIsPremium] = useState<boolean>(false);
+    const [currentSessionId] = useState(() => Math.random().toString(36).substring(2) + Date.now().toString(36));
 
     // Limits
     const FREE_LIMIT = 3;
@@ -37,6 +38,24 @@ export default function App() {
         marketplace: "wb", // 'wb' or 'ozon'
         tone: "selling", // 'selling', 'formal', 'friendly'
     });
+
+    const [isMarketplaceOpen, setIsMarketplaceOpen] = useState(false);
+
+    const marketplaces = [
+        { id: 'wb', label: 'Wildberries' },
+        { id: 'ozon', label: 'Ozon' },
+        { id: 'avito', label: 'Avito' },
+        { id: 'instagram', label: 'Instagram' },
+        { id: 'telegram', label: 'Telegram' },
+    ];
+
+    const [isToneOpen, setIsToneOpen] = useState(false);
+
+    const tones = [
+        { id: 'selling', label: 'Продающий (AIDA)' },
+        { id: 'formal', label: 'Официальный' },
+        { id: 'friendly', label: 'Дружелюбный' },
+    ];
 
     const supabase = createClientComponentClient();
     const router = useRouter();
@@ -120,6 +139,50 @@ export default function App() {
 
         return () => subscription.unsubscribe();
     }, [supabase, router]);
+
+    // Session Control Logic
+    useEffect(() => {
+        if (!user) return;
+
+        const setupSession = async () => {
+            // 1. Claim session (update DB with current tab's ID)
+            await supabase
+                .from('profiles')
+                .update({ active_session_id: currentSessionId })
+                .eq('id', user.id);
+
+            // 2. Listen for changes
+            const channel = supabase
+                .channel(`session_${user.id}`)
+                .on(
+                    'postgres_changes',
+                    {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'profiles',
+                        filter: `id=eq.${user.id}`,
+                    },
+                    (payload) => {
+                        const newSessionId = payload.new.active_session_id;
+                        if (newSessionId && newSessionId !== currentSessionId) {
+                            // Another tab/device took over
+                            // alert("Вы вошли с другого устройства. Эта сессия будет завершена."); // Optional: alert user
+                            supabase.auth.signOut().then(() => {
+                                router.refresh();
+                                router.push("/login");
+                            });
+                        }
+                    }
+                )
+                .subscribe();
+
+            return () => {
+                supabase.removeChannel(channel);
+            };
+        };
+
+        setupSession();
+    }, [user, supabase, currentSessionId, router]);
 
 
     const handleLogout = async () => {
@@ -381,48 +444,106 @@ export default function App() {
                         </div>
 
                         {/* Marketplace Selection */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <button
-                                type="button"
-                                onClick={() => setFormData({ ...formData, marketplace: "wb" })}
-                                className={`p-4 rounded-xl border transition text-center ${formData.marketplace === "wb"
-                                    ? "bg-purple-600 border-purple-500 text-white"
-                                    : "bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10"
-                                    }`}
-                            >
-                                Wildberries
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setFormData({ ...formData, marketplace: "ozon" })}
-                                className={`p-4 rounded-xl border transition text-center ${formData.marketplace === "ozon"
-                                    ? "bg-blue-600 border-blue-500 text-white"
-                                    : "bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10"
-                                    }`}
-                            >
-                                Ozon
-                            </button>
+                        <div className={`relative ${isMarketplaceOpen ? 'z-50' : 'z-30'}`}>
+                            <label className="block text-sm font-medium text-zinc-400 mb-2">Платформа</label>
+
+                            {/* Backdrop for closing */}
+                            {isMarketplaceOpen && (
+                                <div
+                                    className="fixed inset-0 z-10"
+                                    onClick={() => setIsMarketplaceOpen(false)}
+                                />
+                            )}
+
+                            <div className="relative z-20">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsMarketplaceOpen(!isMarketplaceOpen)}
+                                    className={`w-full bg-white/5 border rounded-xl px-4 py-3 flex items-center justify-between transition group ${isMarketplaceOpen ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-white/10 hover:bg-white/10'}`}
+                                >
+                                    <span className="text-zinc-200">
+                                        {marketplaces.find(m => m.id === formData.marketplace)?.label}
+                                    </span>
+                                    <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${isMarketplaceOpen ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {isMarketplaceOpen && (
+                                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 p-1">
+                                        {marketplaces.map((mp) => (
+                                            <button
+                                                key={mp.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    setFormData({ ...formData, marketplace: mp.id });
+                                                    setIsMarketplaceOpen(false);
+                                                }}
+                                                className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition flex items-center justify-between ${formData.marketplace === mp.id
+                                                    ? 'bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white shadow-lg shadow-blue-900/20'
+                                                    : 'text-zinc-300 hover:bg-white/5'
+                                                    }`}
+                                            >
+                                                {mp.label}
+                                                {formData.marketplace === mp.id && <Sparkles className="w-3 h-3" />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Tone Selection */}
-                        <div>
+                        <div className={`relative ${isToneOpen ? 'z-50' : 'z-20'}`}>
                             <label className="block text-sm font-medium text-zinc-400 mb-2">Стиль текста</label>
-                            <select
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 option:bg-black"
-                                value={formData.tone}
-                                onChange={(e) => setFormData({ ...formData, tone: e.target.value })}
-                            >
-                                <option value="selling" className="bg-zinc-900">Продающий (AIDA)</option>
-                                <option value="formal" className="bg-zinc-900">Официальный</option>
-                                <option value="friendly" className="bg-zinc-900">Дружелюбный</option>
-                            </select>
+
+                            {/* Backdrop for closing */}
+                            {isToneOpen && (
+                                <div
+                                    className="fixed inset-0 z-10"
+                                    onClick={() => setIsToneOpen(false)}
+                                />
+                            )}
+
+                            <div className="relative z-20">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsToneOpen(!isToneOpen)}
+                                    className={`w-full bg-white/5 border rounded-xl px-4 py-3 flex items-center justify-between transition group ${isToneOpen ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-white/10 hover:bg-white/10'}`}
+                                >
+                                    <span className="text-zinc-200">
+                                        {tones.find(t => t.id === formData.tone)?.label}
+                                    </span>
+                                    <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${isToneOpen ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {isToneOpen && (
+                                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 p-1">
+                                        {tones.map((tone) => (
+                                            <button
+                                                key={tone.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    setFormData({ ...formData, tone: tone.id });
+                                                    setIsToneOpen(false);
+                                                }}
+                                                className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition flex items-center justify-between ${formData.tone === tone.id
+                                                    ? 'bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white shadow-lg shadow-blue-900/20'
+                                                    : 'text-zinc-300 hover:bg-white/5'
+                                                    }`}
+                                            >
+                                                {tone.label}
+                                                {formData.tone === tone.id && <Sparkles className="w-3 h-3" />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className="pt-4">
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 to-accent text-white font-bold text-lg hover:opacity-90 transition shadow-lg shadow-purple-900/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white font-bold text-lg hover:opacity-90 transition shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? <Loader2 className="animate-spin" /> : <Sparkles className="w-5 h-5 fill-current" />}
                                 {loading ? "Генерируем..." : "Создать описание"}
