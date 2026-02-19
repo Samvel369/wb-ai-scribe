@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Sparkles, TrendingUp, Zap } from "lucide-react";
+import { ArrowRight, Sparkles, TrendingUp, Zap, Infinity as InfinityIcon } from "lucide-react";
 
 export default function Home() {
   return (
@@ -80,7 +80,7 @@ export default function Home() {
             <div className="text-sm text-zinc-500 uppercase tracking-wider mt-1">Уникальность текста</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-white">6</div>
+            <div className="text-3xl font-bold text-white">7</div>
             <div className="text-sm text-zinc-500 uppercase tracking-wider mt-1">Популярных площадок</div>
           </div>
         </div>
@@ -93,9 +93,9 @@ export default function Home() {
             Почему селлеры выбирают нас?
           </h2>
 
-          <div className="flex flex-wrap justify-center gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <div className="w-full md:w-[30%] glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
+            <div className="glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
               <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
                 <TrendingUp className="w-6 h-6" />
               </div>
@@ -106,7 +106,7 @@ export default function Home() {
             </div>
 
             {/* Feature 2 */}
-            <div className="w-full md:w-[30%] glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
+            <div className="glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
               <div className="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400">
                 <Zap className="w-6 h-6" />
               </div>
@@ -117,7 +117,7 @@ export default function Home() {
             </div>
 
             {/* Feature 3 */}
-            <div className="w-full md:w-[30%] glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
+            <div className="glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
               <div className="w-12 h-12 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-400">
                 <Sparkles className="w-6 h-6" />
               </div>
@@ -128,9 +128,8 @@ export default function Home() {
             </div>
 
             {/* Feature 4 */}
-            <div className="w-full md:w-[30%] glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
+            <div className="glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
               <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center text-green-400">
-                {/* Using a generic icon for multi-platform */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -148,14 +147,15 @@ export default function Home() {
                   <polyline points="2 12 12 17 22 12" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold">6 популярных платформ</h3>
+              <h3 className="text-xl font-bold">7 популярных платформ</h3>
               <p className="text-zinc-400 leading-relaxed">
-                Генерируйте контент для популярных площадок электронной коммерции и мессенджеров в одном окне.
+                Генерируйте контент, адаптированный под требования: <br />
+                <span className="text-zinc-300 font-medium">Wildberries • Ozon • Avito • Яндекс.Маркет • Instagram • Telegram • MAX</span>
               </p>
             </div>
 
             {/* Feature 5 */}
-            <div className="w-full md:w-[30%] glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
+            <div className="glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
               <div className="w-12 h-12 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -176,6 +176,17 @@ export default function Home() {
               <h3 className="text-xl font-bold">Human-like текст</h3>
               <p className="text-zinc-400 leading-relaxed">
                 Нейросеть пишет живым, естественным языком, который неотличим от текста, написанного профессиональным копирайтером.
+              </p>
+            </div>
+
+            {/* Feature 6 */}
+            <div className="glass-card p-8 rounded-2xl space-y-4 hover:border-purple-500/30 transition duration-300">
+              <div className="w-12 h-12 rounded-lg bg-fuchsia-500/10 flex items-center justify-center text-fuchsia-400">
+                <InfinityIcon className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold">Безлимитные генерации</h3>
+              <p className="text-zinc-400 leading-relaxed">
+                Никаких ограничений. Создавайте столько описаний, сколько нужно вашему бизнесу, 24/7.
               </p>
             </div>
           </div>
@@ -201,7 +212,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2 text-zinc-300">
                   <Zap className="w-4 h-4 text-zinc-500" />
-                  Базовое качество
+                  GPT-4o Mini (Умнее и быстрее)
                 </li>
               </ul>
               <Link
@@ -214,7 +225,7 @@ export default function Home() {
 
             {/* Pro Plan */}
             <div className="glass-card p-8 rounded-2xl flex flex-col border-purple-500/50 relative overflow-hidden group hover:border-purple-500/80 transition duration-300">
-              <h3 className="text-xl font-bold mb-2">Premium</h3>
+              <h3 className="text-xl font-bold mb-2">PRO</h3>
               <div className="text-3xl font-bold mb-6">990 ₽ <span className="text-sm font-normal text-zinc-500">/ мес</span></div>
               <ul className="space-y-4 mb-8 flex-1">
                 <li className="flex items-center gap-2 text-white">
