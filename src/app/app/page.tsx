@@ -394,9 +394,25 @@ export default function App() {
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-xs text-zinc-500">
-                                        <span className={`px-1.5 py-0.5 rounded ${item.marketplace === 'wb' ? 'bg-purple-500/10 text-purple-400' : 'bg-blue-500/10 text-blue-400'}`}>
-                                            {item.marketplace === 'wb' ? 'WB' : 'OZON'}
-                                        </span>
+                                        {(() => {
+                                            const mp = marketplaces.find(m => m.id === item.marketplace) || { id: item.marketplace, label: item.marketplace };
+                                            let colorClass = 'bg-zinc-500/10 text-zinc-400';
+
+                                            switch (item.marketplace) {
+                                                case 'wb': colorClass = 'bg-purple-500/10 text-purple-400'; break;
+                                                case 'ozon': colorClass = 'bg-blue-500/10 text-blue-400'; break;
+                                                case 'avito': colorClass = 'bg-green-500/10 text-green-400'; break;
+                                                case 'instagram': colorClass = 'bg-pink-500/10 text-pink-400'; break;
+                                                case 'telegram': colorClass = 'bg-sky-500/10 text-sky-400'; break;
+                                                case 'max': colorClass = 'bg-orange-500/10 text-orange-400'; break;
+                                            }
+
+                                            return (
+                                                <span className={`px-1.5 py-0.5 rounded ${colorClass}`}>
+                                                    {mp.label}
+                                                </span>
+                                            );
+                                        })()}
                                         <span>
                                             {new Date(item.created_at).toLocaleDateString()}
                                         </span>
