@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Sparkles, ArrowLeft, Zap } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 type BillingCycle = '1m' | '3m' | '6m' | '1y';
 
@@ -22,6 +23,15 @@ export default function PricingPage() {
         if (plan === 'free') {
             router.push('/app');
         } else {
+            // Check authentication
+            const supabase = createClientComponentClient();
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (!session) {
+                router.push('/login?reason=premium');
+                return;
+            }
+
             try {
                 // Call API to get payment URL
                 const response = await fetch('/api/payment/init', {
@@ -128,7 +138,7 @@ export default function PricingPage() {
 
                         <div className="mb-6 relative">
                             <h3 className="text-xl font-bold mb-2 text-white flex items-center gap-2">
-                                Premium
+                                PRO
                                 {TARIFFS[cycle].savings && (
                                     <span className="text-xs font-normal bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-0.5 rounded-full">
                                         {TARIFFS[cycle].savings}

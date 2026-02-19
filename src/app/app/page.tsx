@@ -271,14 +271,14 @@ export default function App() {
                         <p className="text-zinc-400 mb-6 text-sm text-center">
                             Вы использовали все бесплатные генерации на сегодня (3 шт).
                             <br />
-                            Приходите завтра или перейдите на Premium.
+                            Приходите завтра или перейдите на PRO.
                         </p>
                         <div className="flex gap-3 flex-col">
                             <Link
                                 href="/pricing"
                                 className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-center hover:opacity-90 transition"
                             >
-                                Перейти на Premium
+                                Перейти на PRO
                             </Link>
                             <button
                                 onClick={() => setShowLimitModal(false)}
@@ -334,7 +334,7 @@ export default function App() {
                             : "bg-white/5 border-white/10 text-zinc-500"
                             }`}>
                             <Sparkles className={`w-3 h-3 ${isPremium ? "text-purple-400 fill-purple-400" : "text-zinc-600"}`} />
-                            <span className={isPremium ? "text-purple-100" : "text-zinc-600"}>Premium</span>
+                            <span className={isPremium ? "text-purple-100" : "text-zinc-600"}>PRO</span>
                         </div>
 
                         <Link

@@ -4,8 +4,8 @@ import { createClient } from "@/lib/supabase";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import Link from "next/link";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Login() {
@@ -74,6 +74,9 @@ export default function Login() {
         });
     };
 
+    const searchParams = useSearchParams();
+    const reason = searchParams.get('reason');
+
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center p-4">
             <Link href="/" className="fixed top-8 left-8 p-3 rounded-full bg-white/5 hover:bg-white/10 transition text-zinc-400 hover:text-white z-50 backdrop-blur-md border border-white/5">
@@ -89,6 +92,17 @@ export default function Login() {
                             {view === 'login' ? 'Войдите, чтобы продолжить' : 'Создайте аккаунт для начала работы'}
                         </p>
                     </div>
+
+                    {reason === 'premium' && (
+                        <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 mb-6 text-purple-300 text-sm text-center flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-300">
+                            <span className="p-2 bg-purple-500/20 rounded-full">
+                                <Sparkles className="w-5 h-5 text-purple-400" />
+                            </span>
+                            <p>
+                                Для подключения <b>PRO</b> необходимо <br />войти или зарегистрироваться.
+                            </p>
+                        </div>
+                    )}
 
                     {error && (
                         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-6 text-red-400 text-sm text-center">
