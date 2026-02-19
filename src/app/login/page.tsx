@@ -18,6 +18,7 @@ export default function Login() {
     const [view, setView] = useState<'login' | 'sign_up'>('login');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
     useEffect(() => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -48,9 +49,8 @@ export default function Login() {
                     },
                 });
                 if (error) throw error;
-                // For sign up, we might need to verify email or auto-login depending on settings
-                // Assuming default Supabase setting (confirm email), show message
-                // Or if auto-confirm is on, it will auto-login
+                // Registration successful
+                setRegistrationSuccess(true);
             } else {
                 const { error } = await supabase.auth.signInWithPassword({
                     email,
@@ -59,7 +59,18 @@ export default function Login() {
                 if (error) throw error;
             }
         } catch (err: any) {
-            setError(err.message || "Произошла ошибка");
+            let message = err.message || "Произошла ошибка";
+
+            // Перевод ошибок Supabase
+            if (message.includes("Email not confirmed")) message = "Email не подтвержден. Проверьте почту.";
+            if (message.includes("Invalid login credentials")) message = "Неверный логин или пароль.";
+            if (message.includes("User already registered")) message = "Пользователь уже зарегистрирован.";
+            if (message.includes("Password should be")) message = "Пароль должен быть не менее 6 символов.";
+            if (message.includes("To signup, please provide your email")) message = "Пожалуйста, введите Email.";
+            if (message.includes("Signup requires a valid password")) message = "Требуется надежный пароль.";
+            if (message.includes("Database error")) message = "Ошибка базы данных. Попробуйте позже.";
+
+            setError(message);
         } finally {
             setLoading(false);
         }
@@ -110,63 +121,87 @@ export default function Login() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <label className="block text-sm text-zinc-400 mb-2">Email адрес</label>
-                            <input
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-zinc-800/50 border border-zinc-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-                                placeholder="name@example.com"
-                            />
+                    {registrationSuccess ? (
+                        <div className="text-center animate-in fade-in zoom-in duration-300 py-8">
+                            <div className="flex justify-center mb-6">
+                                <div className="p-4 rounded-full bg-green-500/20 text-green-400">
+                                    <Sparkles className="w-8 h-8" />
+                                </div>
+                            </div>
+                            <h2 className="text-xl font-bold mb-4">Регистрация успешна!</h2>
+                            <p className="text-zinc-400 mb-8">
+                                На вашу почту отправлено письмо для подтверждения.<br />
+                                Пожалуйста, перейдите по ссылке в письме.
+                            </p>
+                            <button
+                                onClick={() => {
+                                    setRegistrationSuccess(false);
+                                    setView('login');
+                                }}
+                                className="w-full py-3.5 rounded-xl bg-white/10 hover:bg-white/20 transition font-medium text-white"
+                            >
+                                Вернуться ко входу
+                            </button>
                         </div>
+                    ) : (
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm text-zinc-400 mb-2">Email адрес</label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full bg-zinc-800/50 border border-zinc-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                                    placeholder="name@example.com"
+                                />
+                            </div>
 
-                        <div>
-                            <label className="block text-sm text-zinc-400 mb-2">Пароль</label>
-                            <input
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-zinc-800/50 border border-zinc-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-                                placeholder="••••••••"
-                            />
-                        </div>
-
-                        {view === 'sign_up' && (
-                            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                                <label className="block text-sm text-zinc-400 mb-2">Повторите пароль</label>
+                            <div>
+                                <label className="block text-sm text-zinc-400 mb-2">Пароль</label>
                                 <input
                                     type="password"
                                     required
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     className="w-full bg-zinc-800/50 border border-zinc-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
                                     placeholder="••••••••"
                                 />
                             </div>
-                        )}
 
-                        {view === 'sign_up' && (
-                            <p className="text-xs text-zinc-500 text-center leading-tight">
-                                Нажимая кнопку «Зарегистрироваться», вы соглашаетесь с <Link href="/legal/offer" className="text-blue-400 hover:underline">Публичной офертой</Link> и <Link href="/legal/privacy" className="text-blue-400 hover:underline">Политикой конфиденциальности</Link>.
-                            </p>
-                        )}
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white font-bold hover:opacity-90 transition shadow-lg shadow-blue-900/20 disabled:opacity-50 flex items-center justify-center gap-2"
-                        >
-                            {loading ? (
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                            ) : (
-                                view === 'login' ? 'Войти' : 'Зарегистрироваться'
+                            {view === 'sign_up' && (
+                                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <label className="block text-sm text-zinc-400 mb-2">Повторите пароль</label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        className="w-full bg-zinc-800/50 border border-zinc-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
                             )}
-                        </button>
-                    </form>
+
+                            {view === 'sign_up' && (
+                                <p className="text-xs text-zinc-500 text-center leading-tight">
+                                    Нажимая кнопку «Зарегистрироваться», вы соглашаетесь с <Link href="/legal/offer" className="text-blue-400 hover:underline">Публичной офертой</Link> и <Link href="/legal/privacy" className="text-blue-400 hover:underline">Политикой конфиденциальности</Link>.
+                                </p>
+                            )}
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white font-bold hover:opacity-90 transition shadow-lg shadow-blue-900/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {loading ? (
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                ) : (
+                                    view === 'login' ? 'Войти' : 'Зарегистрироваться'
+                                )}
+                            </button>
+                        </form>
+                    )}
 
 
 
