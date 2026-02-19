@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Copy, Loader2, Sparkles, ArrowLeft, LogOut, User as UserIcon, History, ChevronRight, Trash2, ChevronDown } from "lucide-react";
+import { Check, Copy, Loader2, Sparkles, ArrowLeft, LogOut, User as UserIcon, History, ChevronRight, Trash2, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { User } from "@supabase/supabase-js";
@@ -145,6 +145,54 @@ export default function App() {
         return () => subscription.unsubscribe();
     }, [supabase, router]);
 
+    // Payment Check Logic
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    useEffect(() => {
+        const checkPayment = async () => {
+            // Check for URL parameter
+            if (typeof window !== 'undefined') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const paymentCheck = urlParams.get('payment_check');
+
+                if (paymentCheck === 'true') {
+                    const paymentId = localStorage.getItem('pending_payment_id');
+                    if (paymentId) {
+                        try {
+                            const response = await fetch('/api/payment/check', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ paymentId })
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                setShowSuccessModal(true);
+                                localStorage.removeItem('pending_payment_id');
+                                // Remove query param without reload
+                                const newUrl = window.location.pathname;
+                                window.history.replaceState({}, '', newUrl);
+                                // Refresh user profile
+                                fetchHistory();
+                            } else if (data.status === 'pending') {
+                                // Maybe show a toast that payment is processing?
+                                // For now, silent retry or just ignore.
+                                console.log('Payment pending...');
+                            } else {
+                                console.error('Payment failed or cancelled');
+                                // alert('Оплата не прошла или была отменена');
+                            }
+                        } catch (error) {
+                            console.error('Error checking payment:', error);
+                        }
+                    }
+                }
+            }
+        };
+
+        checkPayment();
+    }, []);
+
     // Session Control Logic
     useEffect(() => {
         if (!user) return;
@@ -262,6 +310,30 @@ export default function App() {
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white p-4 relative">
+            {/* Payment Success Modal */}
+            {showSuccessModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                    <div className="bg-zinc-900 border border-green-500/30 rounded-2xl p-8 max-w-md w-full shadow-2xl shadow-green-900/20 animate-in fade-in zoom-in duration-300 text-center relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-emerald-500"></div>
+                        <div className="flex justify-center mb-6">
+                            <div className="p-4 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
+                                <Check className="w-12 h-12" />
+                            </div>
+                        </div>
+                        <h3 className="text-2xl font-bold mb-2 text-white">Оплата прошла успешно!</h3>
+                        <p className="text-zinc-400 mb-8">
+                            Спасибо за подписку! Ваш статус <span className="text-purple-400 font-bold">PRO</span> активирован.
+                            <br />Теперь вам доступны безлимитные генерации.
+                        </p>
+                        <button
+                            onClick={() => setShowSuccessModal(false)}
+                            className="w-full py-3 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold hover:opacity-90 transition shadow-lg shadow-green-900/30"
+                        >
+                            Отлично!
+                        </button>
+                    </div>
+                </div>
+            )}
             {/* Limit Reached Modal */}
             {showLimitModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">

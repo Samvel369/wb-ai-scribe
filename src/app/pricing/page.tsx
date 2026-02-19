@@ -42,7 +42,9 @@ export default function PricingPage() {
 
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.url) {
+                    if (data.url && data.payment_id) {
+                        // Store payment_id to check status later
+                        localStorage.setItem('pending_payment_id', data.payment_id);
                         window.location.href = data.url;
                     } else {
                         alert('Ошибка: не получена ссылка на оплату');

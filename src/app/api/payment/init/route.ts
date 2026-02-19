@@ -1,11 +1,9 @@
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
 
-const ROBOKASSA_LOGIN = process.env.ROBOKASSA_LOGIN;
-const ROBOKASSA_PASSWORD_1 = process.env.ROBOKASSA_PASSWORD_1;
-const ROBOKASSA_IS_TEST = process.env.ROBOKASSA_IS_TEST;
+const YOOKASSA_SHOP_ID = process.env.DTO_YOOKASSA_SHOP_ID;
+const YOOKASSA_SECRET_KEY = process.env.DTO_YOOKASSA_SECRET_KEY;
 
 const TARIFFS: Record<string, number> = {
     '1m': 990,
@@ -31,32 +29,48 @@ export async function POST(request: Request) {
         }
 
         const userId = session.user.id;
-        const outSum = TARIFFS[plan].toString();
-        const invId = '0'; // Using 0 as we track via Shp_UserId
-        const isTest = ROBOKASSA_IS_TEST === '1';
+        const amount = TARIFFS[plan].toFixed(2);
+        const idempotenceKey = crypto.randomUUID();
 
-        // Custom parameters (Must be sorted alphabetically for signature!)
-        // Shp_Plan
-        // Shp_UserId
+        // Create Payment in YooKassa
+        const auth = Buffer.from(`${YOOKASSA_SHOP_ID}:${YOOKASSA_SECRET_KEY}`).toString('base64');
 
-        // Signature: Login:OutSum:InvId:Pass1:Shp_Plan=...:Shp_UserId=...
-        const signatureString = `${ROBOKASSA_LOGIN}:${outSum}:${invId}:${ROBOKASSA_PASSWORD_1}:Shp_Plan=${plan}:Shp_UserId=${userId}`;
-        const signature = crypto.createHash('md5').update(signatureString).digest('hex');
+        const response = await fetch('https://api.yookassa.ru/v3/payments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${auth}`,
+                'Idempotence-Key': idempotenceKey
+            },
+            body: JSON.stringify({
+                amount: {
+                    value: amount,
+                    currency: 'RUB'
+                },
+                capture: true,
+                confirmation: {
+                    type: 'redirect',
+                    return_url: `${request.headers.get('origin')}/app?payment_check=true`
+                },
+                description: `Подписка AI Seller Pro (${plan})`,
+                metadata: {
+                    user_id: userId,
+                    plan_id: plan
+                }
+            })
+        });
 
-        let url = `https://auth.robokassa.ru/Merchant/Index.aspx?`;
-        url += `MerchantLogin=${ROBOKASSA_LOGIN}`;
-        url += `&OutSum=${outSum}`;
-        url += `&InvId=${invId}`;
-        url += `&Description=${encodeURIComponent(`Подписка AI Seller на ${plan}`)}`;
-        url += `&SignatureValue=${signature}`;
-        url += `&Shp_Plan=${plan}`;
-        url += `&Shp_UserId=${userId}`;
+        const paymentData = await response.json();
 
-        if (isTest) {
-            url += `&IsTest=1`;
+        if (!response.ok) {
+            console.error('YooKassa Error:', paymentData);
+            return NextResponse.json({ error: 'Payment provider error' }, { status: 500 });
         }
 
-        return NextResponse.json({ url });
+        return NextResponse.json({
+            url: paymentData.confirmation.confirmation_url,
+            payment_id: paymentData.id
+        });
 
     } catch (error) {
         console.error('Payment Init Error:', error);

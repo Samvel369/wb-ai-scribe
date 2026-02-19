@@ -1,12 +1,17 @@
 {
-    "css.validate": true,
-    "css.lint.unknownAtRules": "ignore",
-    "scss.validate": false,
-    "less.validate": false,
     "files.associations": {
         "*.css": "tailwindcss"
     },
     "editor.quickSuggestions": {
         "strings": true
-    }
+    },
+    "tailwindCSS.includeLanguages": {
+        "plaintext": "tailwindcss",
+        "html": "tailwindcss",
+        "css": "tailwindcss"
+    },
+    "css.validate": false,
+    "less.validate": false,
+    "scss.validate": false,
+    "css.lint.unknownAtRules": "ignore"
 }
