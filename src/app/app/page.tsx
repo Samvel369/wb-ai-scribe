@@ -27,6 +27,7 @@ export default function App() {
     const [showLimitModal, setShowLimitModal] = useState(false);
 
     const [isPremium, setIsPremium] = useState<boolean>(false);
+    const [subscriptionEndDate, setSubscriptionEndDate] = useState<Date | null>(null);
     const [currentSessionId] = useState(() => Math.random().toString(36).substring(2) + Date.now().toString(36));
 
     // Limits
@@ -79,13 +80,16 @@ export default function App() {
             // Fetch Profile (Limits)
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('generation_count, is_premium')
+                .select('generation_count, is_premium, subscription_end_date')
                 .eq('id', currentUserId)
                 .single();
 
             if (profile) {
                 setGenerationCount(profile.generation_count);
                 setIsPremium(profile.is_premium);
+                if (profile.subscription_end_date) {
+                    setSubscriptionEndDate(new Date(profile.subscription_end_date));
+                }
             }
 
         } catch (e) {
@@ -329,12 +333,26 @@ export default function App() {
                 </div>
                 {user && (
                     <div className="flex items-center gap-4">
-                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition ${isPremium
+                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition relative group cursor-help ${isPremium
                             ? "bg-purple-900/50 border-purple-500/50 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.3)]"
                             : "bg-white/5 border-white/10 text-zinc-500"
                             }`}>
                             <Sparkles className={`w-3 h-3 ${isPremium ? "text-purple-400 fill-purple-400" : "text-zinc-600"}`} />
                             <span className={isPremium ? "text-purple-100" : "text-zinc-600"}>PRO</span>
+
+                            {/* Tooltip for subscription end date */}
+                            {isPremium && subscriptionEndDate && (
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 p-3 rounded-xl bg-[#1e1e1e] border border-white/10 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center">
+                                    <p className="text-[10px] text-zinc-400 uppercase tracking-wider font-bold mb-1">Действует до</p>
+                                    <p className="text-white font-medium">
+                                        {subscriptionEndDate.toLocaleDateString('ru-RU', {
+                                            day: 'numeric',
+                                            month: 'long',
+                                            year: 'numeric'
+                                        })}
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         <Link
