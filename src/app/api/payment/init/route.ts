@@ -2,8 +2,8 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-const YOOKASSA_SHOP_ID = process.env.DTO_YOOKASSA_SHOP_ID;
-const YOOKASSA_SECRET_KEY = process.env.DTO_YOOKASSA_SECRET_KEY;
+const YOOKASSA_SHOP_ID = process.env.DTO_YOOKASSA_SHOP_ID?.trim();
+const YOOKASSA_SECRET_KEY = process.env.DTO_YOOKASSA_SECRET_KEY?.trim();
 
 console.log("------------------------------------------------------------------");
 console.log("PAYMENT INIT DEBUG:");
