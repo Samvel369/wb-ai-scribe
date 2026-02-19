@@ -5,6 +5,12 @@ import { NextResponse } from 'next/server';
 const YOOKASSA_SHOP_ID = process.env.DTO_YOOKASSA_SHOP_ID;
 const YOOKASSA_SECRET_KEY = process.env.DTO_YOOKASSA_SECRET_KEY;
 
+console.log("------------------------------------------------------------------");
+console.log("PAYMENT INIT DEBUG:");
+console.log("SHOP_ID:", YOOKASSA_SHOP_ID ? "LOADED" : "MISSING", YOOKASSA_SHOP_ID);
+console.log("SECRET_KEY:", YOOKASSA_SECRET_KEY ? "LOADED" : "MISSING", YOOKASSA_SECRET_KEY ? "******" + YOOKASSA_SECRET_KEY.slice(-4) : "");
+console.log("------------------------------------------------------------------");
+
 const TARIFFS: Record<string, number> = {
     '1m': 990,
     '3m': 2490,
@@ -64,7 +70,11 @@ export async function POST(request: Request) {
 
         if (!response.ok) {
             console.error('YooKassa Error:', paymentData);
-            return NextResponse.json({ error: 'Payment provider error' }, { status: 500 });
+            // Возвращаем детали ошибки на фронтенд для отладки
+            return NextResponse.json({
+                error: 'Payment provider error',
+                details: paymentData
+            }, { status: 500 });
         }
 
         return NextResponse.json({

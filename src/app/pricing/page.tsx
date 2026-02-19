@@ -51,11 +51,13 @@ export default function PricingPage() {
                     }
                 } else {
                     const error = await response.json();
-                    alert(`Ошибка: ${error.error || 'Неизвестная ошибка'}`);
+                    console.error("Payment Error:", error);
+                    // Показываем подробности ошибки, чтобы понять, что не так
+                    alert(`Ошибка оплаты:\n${error.error}\n\nДетали: ${JSON.stringify(error.details, null, 2)}`);
                 }
             } catch (e) {
                 console.error(e);
-                alert('Произошла ошибка при инициализации оплаты');
+                alert('Произошла ошибка сети или сервера при инициализации оплаты');
             }
         }
     };
@@ -117,7 +119,7 @@ export default function PricingPage() {
                                 <div className="p-1 rounded-full bg-white/10">
                                     <Sparkles className="w-3 h-3 text-white" />
                                 </div>
-                                <span>Базовое качество</span>
+                                <span>GPT-4o Mini (Умнее и быстрее)</span>
                             </li>
                         </ul>
 
