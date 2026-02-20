@@ -49,6 +49,7 @@ export default function App() {
         { id: 'instagram', label: 'Instagram' },
         { id: 'telegram', label: 'Telegram' },
         { id: 'max', label: 'MAX' },
+        { id: 'yandex', label: 'Яндекс.Маркет' },
     ];
 
     const [isToneOpen, setIsToneOpen] = useState(false);
@@ -495,6 +496,7 @@ export default function App() {
                                                 case 'instagram': colorClass = 'bg-pink-500/10 text-pink-400'; break;
                                                 case 'telegram': colorClass = 'bg-sky-500/10 text-sky-400'; break;
                                                 case 'max': colorClass = 'bg-orange-500/10 text-orange-400'; break;
+                                                case 'yandex': colorClass = 'bg-yellow-500/10 text-yellow-400'; break;
                                             }
 
                                             return (
