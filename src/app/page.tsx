@@ -41,17 +41,17 @@ export default function Home() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </span>
-            Специально для селлеров маркетплейсов
+            AI Seller Pro — лучший помощник для селлеров
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight">
-            SEO-описания для товаров <br />
+            Генератор SEO-описаний <br />
             <span className="text-gradient">за 10 секунд</span>
           </h1>
 
           <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto">
             Искусственный интеллект, оптимизированный для алгоритмов маркетплейсов.
-            Создаем контент для повышения позиций в поиске и конверсии в корзину.
+            Создаем контент для повышения позиций в поиске и продаж на WB, Ozon, Avito и других площадках.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
