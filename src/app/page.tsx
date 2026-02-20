@@ -1,7 +1,6 @@
-"use client";
-
 import Link from "next/link";
 import { ArrowRight, Sparkles, TrendingUp, Zap, Infinity as InfinityIcon } from "lucide-react";
+import PricingCards from "./components/PricingCards";
 
 export default function Home() {
   return (
@@ -200,55 +199,7 @@ export default function Home() {
             Тарифы
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Free Plan */}
-            <div className="glass-card p-8 rounded-2xl flex flex-col border-zinc-800">
-              <h3 className="text-xl font-bold mb-2">Старт</h3>
-              <div className="text-3xl font-bold mb-6">0 ₽ <span className="text-sm font-normal text-zinc-500">/ мес</span></div>
-              <ul className="space-y-4 mb-8 flex-1">
-                <li className="flex items-center gap-2 text-zinc-300">
-                  <Zap className="w-4 h-4 text-zinc-500" />
-                  3 генерации в день
-                </li>
-                <li className="flex items-center gap-2 text-zinc-300">
-                  <Zap className="w-4 h-4 text-zinc-500" />
-                  GPT-4o Mini (Умнее и быстрее)
-                </li>
-              </ul>
-              <Link
-                href="/app"
-                className="w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-center transition"
-              >
-                Попробовать
-              </Link>
-            </div>
-
-            {/* Pro Plan */}
-            <div className="glass-card p-8 rounded-2xl flex flex-col border-purple-500/50 relative overflow-hidden group hover:border-purple-500/80 transition duration-300">
-              <h3 className="text-xl font-bold mb-2">PRO</h3>
-              <div className="text-3xl font-bold mb-6">990 ₽ <span className="text-sm font-normal text-zinc-500">/ мес</span></div>
-              <ul className="space-y-4 mb-8 flex-1">
-                <li className="flex items-center gap-2 text-white">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                  Безлимитные генерации
-                </li>
-                <li className="flex items-center gap-2 text-white">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                  GPT-4o Mini (Умнее и быстрее)
-                </li>
-                <li className="flex items-center gap-2 text-white">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                  Поддержка
-                </li>
-              </ul>
-              <Link
-                href="/pricing"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white font-bold text-center hover:opacity-90 transition shadow-lg shadow-blue-900/20"
-              >
-                Подключить PRO
-              </Link>
-            </div>
-          </div>
+          <PricingCards />
         </div>
       </section>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, Copy, Loader2, Sparkles, ArrowLeft, LogOut, User as UserIcon, History, ChevronRight, Trash2, ChevronDown } from "lucide-react";
+import { Check, Copy, Loader2, Sparkles, ArrowLeft, LogOut, User as UserIcon, History, ChevronRight, Trash2, ChevronDown, Zap } from "lucide-react";
 import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { User } from "@supabase/supabase-js";
@@ -27,6 +27,7 @@ export default function App() {
     const [showLimitModal, setShowLimitModal] = useState(false);
 
     const [isPremium, setIsPremium] = useState<boolean>(false);
+    const [subscriptionPlanId, setSubscriptionPlanId] = useState<string | null>(null);
     const [subscriptionEndDate, setSubscriptionEndDate] = useState<Date | null>(null);
     const [currentSessionId] = useState(() => Math.random().toString(36).substring(2) + Date.now().toString(36));
 
@@ -81,13 +82,14 @@ export default function App() {
             // Fetch Profile (Limits)
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('generation_count, is_premium, subscription_end_date')
+                .select('generation_count, is_premium, subscription_end_date, subscription_plan_id')
                 .eq('id', currentUserId)
                 .single();
 
             if (profile) {
                 setGenerationCount(profile.generation_count);
                 setIsPremium(profile.is_premium);
+                setSubscriptionPlanId(profile.subscription_plan_id);
                 if (profile.subscription_end_date) {
                     setSubscriptionEndDate(new Date(profile.subscription_end_date));
                 }
@@ -323,7 +325,9 @@ export default function App() {
                         </div>
                         <h3 className="text-2xl font-bold mb-2 text-white">Оплата прошла успешно!</h3>
                         <p className="text-zinc-400 mb-8">
-                            Спасибо за подписку! Ваш статус <span className="text-purple-400 font-bold">PRO</span> активирован.
+                            Спасибо за подписку! Ваш статус <span className={`${(subscriptionPlanId === '1d' || subscriptionPlanId === '3d') ? 'text-blue-400' : 'text-purple-400'} font-bold uppercase`}>
+                                {(subscriptionPlanId === '1d' || subscriptionPlanId === '3d') ? 'FAST' : 'PRO'}
+                            </span> активирован.
                             <br />Теперь вам доступны безлимитные генерации.
                         </p>
                         <button
@@ -406,27 +410,49 @@ export default function App() {
                 </div>
                 {user && (
                     <div className="flex items-center gap-4">
-                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition relative group cursor-help ${isPremium
-                            ? "bg-purple-900/50 border-purple-500/50 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.3)]"
-                            : "bg-white/5 border-white/10 text-zinc-500"
-                            }`}>
-                            <Sparkles className={`w-3 h-3 ${isPremium ? "text-purple-400 fill-purple-400" : "text-zinc-600"}`} />
-                            <span className={isPremium ? "text-purple-100" : "text-zinc-600"}>PRO</span>
+                        {/* Premium Badge Logic */}
+                        {(() => {
+                            // Determine badge style based on plan
+                            const isFast = subscriptionPlanId === '1d' || subscriptionPlanId === '3d';
+                            const badgeStyle = isPremium
+                                ? isFast
+                                    ? "bg-blue-900/50 border-blue-500/50 text-blue-200 shadow-[0_0_10px_rgba(59,130,246,0.3)]" // FAST Style
+                                    : "bg-purple-900/50 border-purple-500/50 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.3)]" // PRO Style
+                                : "bg-white/5 border-white/10 text-zinc-500"; // Free Style
 
-                            {/* Tooltip for subscription end date */}
-                            {isPremium && subscriptionEndDate && (
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 p-3 rounded-xl bg-[#1e1e1e] border border-white/10 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center">
-                                    <p className="text-[10px] text-zinc-400 uppercase tracking-wider font-bold mb-1">Действует до</p>
-                                    <p className="text-white font-medium">
-                                        {subscriptionEndDate.toLocaleDateString('ru-RU', {
-                                            day: 'numeric',
-                                            month: 'long',
-                                            year: 'numeric'
-                                        })}
-                                    </p>
+                            const iconColor = isPremium
+                                ? isFast ? "text-blue-400 fill-blue-400" : "text-purple-400 fill-purple-400"
+                                : "text-zinc-600";
+
+                            const badgeText = isPremium
+                                ? isFast ? "FAST" : "PRO"
+                                : "FREE";
+
+                            const textColor = isPremium
+                                ? isFast ? "text-blue-100" : "text-purple-100"
+                                : "text-zinc-600";
+
+                            return (
+                                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition relative group cursor-help ${badgeStyle}`}>
+                                    {isFast ? <Zap className={`w-3 h-3 ${iconColor}`} /> : <Sparkles className={`w-3 h-3 ${iconColor}`} />}
+                                    <span className={textColor}>{badgeText}</span>
+
+                                    {/* Tooltip for subscription end date */}
+                                    {isPremium && subscriptionEndDate && (
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 p-3 rounded-xl bg-[#1e1e1e] border border-white/10 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center">
+                                            <p className="text-[10px] text-zinc-400 uppercase tracking-wider font-bold mb-1">Действует до</p>
+                                            <p className="text-white font-medium">
+                                                {subscriptionEndDate.toLocaleDateString('ru-RU', {
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric'
+                                                })}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
+                            );
+                        })()}
 
                         <Link
                             href="/pricing"

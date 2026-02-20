@@ -74,7 +74,12 @@ export async function POST(request: Request) {
             // Calculate End Date
             const now = new Date();
             const endDate = new Date(now);
-            if (planId === '1m') endDate.setMonth(now.getMonth() + 1);
+
+            // FAST Tariffs
+            if (planId === '1d') endDate.setDate(now.getDate() + 1);
+            else if (planId === '3d') endDate.setDate(now.getDate() + 3);
+            // PRO Tariffs
+            else if (planId === '1m') endDate.setMonth(now.getMonth() + 1);
             else if (planId === '3m') endDate.setMonth(now.getMonth() + 3);
             else if (planId === '6m') endDate.setMonth(now.getMonth() + 6);
             else if (planId === '1y') endDate.setFullYear(now.getFullYear() + 1);

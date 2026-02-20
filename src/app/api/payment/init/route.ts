@@ -12,6 +12,8 @@ console.log("SECRET_KEY:", YOOKASSA_SECRET_KEY ? "LOADED" : "MISSING", YOOKASSA_
 console.log("------------------------------------------------------------------");
 
 const TARIFFS: Record<string, number> = {
+    '1d': 79,
+    '3d': 149,
     '1m': 990,
     '3m': 2490,
     '6m': 4790,
