@@ -25,6 +25,7 @@ WORKDIR /app
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_OPTIONS="--max-old-space-size=1024"
 
 # Создаем пользователя nextjs для безопасности
 RUN addgroup --system --gid 1001 nodejs
