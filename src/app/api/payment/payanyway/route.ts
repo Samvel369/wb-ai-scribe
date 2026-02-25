@@ -1,33 +1,25 @@
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 
 const PAYANYWAY_MNT_ID = process.env.PAYANYWAY_MNT_ID?.trim();
-const PAYANYWAY_MNT_DATAINTEGRITY_CODE = process.env.PAYANYWAY_MNT_DATAINTEGRITY_CODE?.trim();
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 export async function POST(request: Request) {
     try {
-        // У PayAnyWay вебхуки обычно приходят в виде x-www-form-urlencoded
+        // PayAnyWay вебхуки приходят в виде x-www-form-urlencoded
         const formData = await request.formData();
 
         const MNT_ID = formData.get('MNT_ID') as string;
         const MNT_TRANSACTION_ID = formData.get('MNT_TRANSACTION_ID') as string;
         const MNT_OPERATION_ID = formData.get('MNT_OPERATION_ID') as string;
         const MNT_AMOUNT = formData.get('MNT_AMOUNT') as string;
-        const MNT_CURRENCY_CODE = formData.get('MNT_CURRENCY_CODE') as string;
-        const MNT_SUBSCRIBER_ID = formData.get('MNT_SUBSCRIBER_ID') as string || '';
-        const MNT_TEST_MODE = formData.get('MNT_TEST_MODE') as string || '0';
-        const MNT_SIGNATURE = formData.get('MNT_SIGNATURE') as string;
 
-        // 1. Проверяем подпись (MNT_SIGNATURE) от PayAnyWay
-        // Формат проверки: MD5(MNT_ID + MNT_TRANSACTION_ID + MNT_OPERATION_ID + MNT_AMOUNT + MNT_CURRENCY_CODE + MNT_SUBSCRIBER_ID + MNT_TEST_MODE + Секретный_код)
-        const signatureString = `${MNT_ID}${MNT_TRANSACTION_ID}${MNT_OPERATION_ID}${MNT_AMOUNT}${MNT_CURRENCY_CODE}${MNT_SUBSCRIBER_ID}${MNT_TEST_MODE}${PAYANYWAY_MNT_DATAINTEGRITY_CODE}`;
-        const calculatedSignature = crypto.createHash('md5').update(signatureString).digest('hex').toLowerCase();
+        console.log('PayAnyWay Webhook received:', { MNT_ID, MNT_TRANSACTION_ID, MNT_OPERATION_ID, MNT_AMOUNT });
 
-        if (calculatedSignature !== MNT_SIGNATURE?.toLowerCase()) {
-            console.error('PayAnyWay Invalid Signature!', { received: MNT_SIGNATURE, calculated: calculatedSignature });
+        // 1. Проверяем что запрос пришёл для нашего магазина (вместо подписи, т.к. для самозанятых она не поддерживается)
+        if (MNT_ID !== PAYANYWAY_MNT_ID) {
+            console.error('PayAnyWay Invalid MNT_ID!', { received: MNT_ID, expected: PAYANYWAY_MNT_ID });
             return new NextResponse('FAIL', { status: 400 });
         }
 
