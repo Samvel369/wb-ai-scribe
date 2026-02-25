@@ -64,8 +64,8 @@ export async function POST(request: Request) {
         const currency = 'RUB';
         const description = `Подписка AI Seller Pro (${plan})`;
 
-        // Формируем ссылку на оплату (self.payanyway.ru — портал для самозанятых)
-        const payUrl = new URL('https://self.payanyway.ru/assistant.htm');
+        // Формируем ссылку на оплату через assistant.moneta.ru
+        const payUrl = new URL('https://assistant.moneta.ru/assistant.htm');
         payUrl.searchParams.set('MNT_ID', PAYANYWAY_MNT_ID || '');
         payUrl.searchParams.set('MNT_TRANSACTION_ID', transactionId);
         payUrl.searchParams.set('MNT_CURRENCY_CODE', currency);
