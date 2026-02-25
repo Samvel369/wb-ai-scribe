@@ -1,19 +1,10 @@
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-const YOOKASSA_SHOP_ID = process.env.DTO_YOOKASSA_SHOP_ID?.trim();
-const YOOKASSA_SECRET_KEY = process.env.DTO_YOOKASSA_SECRET_KEY?.trim();
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-// We need a Service Role Client to update other users or bypass strict RLS if needed,
-// but usually Route Handler with User Session works fine for updating OWN profile IF policies allow.
-// However, to be safe and authoritative, we'll use Service Role if available, 
-// or standard client if we trust the user to update their own (risk: they could call this API manually? 
-// No, because we verify with YooKassa first!).
-
-import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: Request) {
     try {
@@ -32,7 +23,9 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // 2. Add Service Role Client for database updates
+        const userId = session.user.id;
+
+        // 2. Add Service Role Client for secure database reads
         const supabaseAdmin = createClient(
             NEXT_PUBLIC_SUPABASE_URL!,
             SUPABASE_SERVICE_ROLE_KEY!,
@@ -44,67 +37,30 @@ export async function POST(request: Request) {
             }
         );
 
-        // 3. Verify Payment with YooKassa
-        const auth = Buffer.from(`${YOOKASSA_SHOP_ID}:${YOOKASSA_SECRET_KEY}`).toString('base64');
-        const response = await fetch(`https://api.yookassa.ru/v3/payments/${paymentId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Basic ${auth}`,
-                'Content-Type': 'application/json'
-            }
-        });
+        // 3. Check Payment Status in our DB (Webhook should have updated it)
+        const { data: payment, error } = await supabaseAdmin
+            .from('payments')
+            .select('*')
+            .eq('id', paymentId)
+            .single();
 
-        if (!response.ok) {
-            console.error('YooKassa Check Error:', response.statusText);
-            return NextResponse.json({ error: 'Failed to verify payment' }, { status: 502 });
+        if (error || !payment) {
+            console.error('Payment DB Check Error:', error);
+            return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
         }
 
-        const paymentData = await response.json();
+        // Double check user match
+        if (payment.user_id !== userId) {
+            return NextResponse.json({ error: 'User mismatch' }, { status: 403 });
+        }
 
-        // 4. Check Status
-        if (paymentData.status === 'succeeded') {
-            const planId = paymentData.metadata.plan_id;
-            const userId = paymentData.metadata.user_id;
-
-            // Double check user match
-            if (userId !== session.user.id) {
-                return NextResponse.json({ error: 'User mismatch' }, { status: 403 });
-            }
-
-            // Calculate End Date
-            const now = new Date();
-            const endDate = new Date(now);
-
-            // FAST Tariffs
-            if (planId === '1d') endDate.setDate(now.getDate() + 1);
-            else if (planId === '3d') endDate.setDate(now.getDate() + 3);
-            // PRO Tariffs
-            else if (planId === '1m') endDate.setMonth(now.getMonth() + 1);
-            else if (planId === '3m') endDate.setMonth(now.getMonth() + 3);
-            else if (planId === '6m') endDate.setMonth(now.getMonth() + 6);
-            else if (planId === '1y') endDate.setFullYear(now.getFullYear() + 1);
-
-            // Update Database
-            const { error: updateError } = await supabaseAdmin
-                .from('profiles')
-                .update({
-                    is_premium: true,
-                    subscription_end_date: endDate.toISOString(),
-                    subscription_plan_id: planId,
-                    subscription_status: 'active'
-                })
-                .eq('id', userId);
-
-            if (updateError) {
-                console.error('DB Update Error:', updateError);
-                return NextResponse.json({ error: 'DB Update Failed' }, { status: 500 });
-            }
-
-            return NextResponse.json({ success: true, plan: planId });
-        } else if (paymentData.status === 'pending') {
+        // 4. Return Status
+        if (payment.status === 'succeeded' || payment.status === 'paid') {
+            return NextResponse.json({ success: true, plan: payment.plan_id });
+        } else if (payment.status === 'pending') {
             return NextResponse.json({ success: false, status: 'pending' });
         } else {
-            return NextResponse.json({ success: false, status: paymentData.status });
+            return NextResponse.json({ success: false, status: payment.status });
         }
 
     } catch (error) {

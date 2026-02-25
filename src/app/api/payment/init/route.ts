@@ -1,15 +1,11 @@
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-const YOOKASSA_SHOP_ID = process.env.DTO_YOOKASSA_SHOP_ID?.trim();
-const YOOKASSA_SECRET_KEY = process.env.DTO_YOOKASSA_SECRET_KEY?.trim();
-
-console.log("------------------------------------------------------------------");
-console.log("PAYMENT INIT DEBUG:");
-console.log("SHOP_ID:", YOOKASSA_SHOP_ID ? "LOADED" : "MISSING", YOOKASSA_SHOP_ID);
-console.log("SECRET_KEY:", YOOKASSA_SECRET_KEY ? "LOADED" : "MISSING", YOOKASSA_SECRET_KEY ? "******" + YOOKASSA_SECRET_KEY.slice(-4) : "");
-console.log("------------------------------------------------------------------");
+const PAYANYWAY_MNT_ID = process.env.PAYANYWAY_MNT_ID?.trim();
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 const TARIFFS: Record<string, number> = {
     '1d': 79,
@@ -38,50 +34,51 @@ export async function POST(request: Request) {
 
         const userId = session.user.id;
         const amount = TARIFFS[plan].toFixed(2);
-        const idempotenceKey = crypto.randomUUID();
 
-        // Create Payment in YooKassa
-        const auth = Buffer.from(`${YOOKASSA_SHOP_ID}:${YOOKASSA_SECRET_KEY}`).toString('base64');
+        // Админский клиент для записи в защищенную таблицу
+        const supabaseAdmin = createClient(
+            NEXT_PUBLIC_SUPABASE_URL!,
+            SUPABASE_SERVICE_ROLE_KEY!,
+            {
+                auth: { autoRefreshToken: false, persistSession: false }
+            }
+        );
 
-        const response = await fetch('https://api.yookassa.ru/v3/payments', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Basic ${auth}`,
-                'Idempotence-Key': idempotenceKey
-            },
-            body: JSON.stringify({
-                amount: {
-                    value: amount,
-                    currency: 'RUB'
-                },
-                capture: true,
-                confirmation: {
-                    type: 'redirect',
-                    return_url: `${request.headers.get('origin')}/app?payment_check=true`
-                },
-                description: `Подписка AI Seller Pro (${plan})`,
-                metadata: {
-                    user_id: userId,
-                    plan_id: plan
-                }
+        // 1. Создаем заказ в нашей базе данных
+        const { data: payment, error: insertError } = await supabaseAdmin
+            .from('payments')
+            .insert({
+                user_id: userId,
+                plan_id: plan,
+                amount: TARIFFS[plan]
             })
-        });
+            .select('id')
+            .single();
 
-        const paymentData = await response.json();
-
-        if (!response.ok) {
-            console.error('YooKassa Error:', paymentData);
-            // Возвращаем детали ошибки на фронтенд для отладки
-            return NextResponse.json({
-                error: 'Payment provider error',
-                details: paymentData
-            }, { status: 500 });
+        if (insertError || !payment) {
+            console.error('DB Insert Error:', insertError);
+            return NextResponse.json({ error: 'Failed to create payment in DB' }, { status: 500 });
         }
 
+        const transactionId = payment.id;
+        const currency = 'RUB';
+        const description = `Подписка AI Seller Pro (${plan})`;
+
+        // 3. Формируем ссылку на оплату БЕЗ подписи (для самозанятых аккаунтов PayAnyWay подпись может быть не поддержана)
+        const payUrl = new URL('https://www.payanyway.ru/assistant.htm');
+        payUrl.searchParams.set('MNT_ID', PAYANYWAY_MNT_ID || '');
+        payUrl.searchParams.set('MNT_TRANSACTION_ID', transactionId);
+        payUrl.searchParams.set('MNT_CURRENCY_CODE', currency);
+        payUrl.searchParams.set('MNT_AMOUNT', amount);
+        payUrl.searchParams.set('MNT_DESCRIPTION', description);
+
+        // Возврат на сайт после успешной оплаты
+        const successUrl = `${request.headers.get('origin')}/app?payment_check=true`;
+        payUrl.searchParams.set('MNT_SUCCESS_URL', successUrl);
+
         return NextResponse.json({
-            url: paymentData.confirmation.confirmation_url,
-            payment_id: paymentData.id
+            url: payUrl.toString(),
+            payment_id: transactionId
         });
 
     } catch (error) {
