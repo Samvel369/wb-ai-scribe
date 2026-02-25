@@ -5,6 +5,15 @@ const PAYANYWAY_MNT_ID = process.env.PAYANYWAY_MNT_ID?.trim();
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
+const PLAN_NAMES: Record<string, string> = {
+    '1d': 'Подписка AI Seller Pro FAST (1 день)',
+    '3d': 'Подписка AI Seller Pro FAST (3 дня)',
+    '1m': 'Подписка AI Seller Pro PRO (1 месяц)',
+    '3m': 'Подписка AI Seller Pro PRO (3 месяца)',
+    '6m': 'Подписка AI Seller Pro PRO (6 месяцев)',
+    '1y': 'Подписка AI Seller Pro PRO (1 год)',
+};
+
 export async function POST(request: Request) {
     try {
         // PayAnyWay вебхуки приходят в виде x-www-form-urlencoded
@@ -17,7 +26,7 @@ export async function POST(request: Request) {
 
         console.log('PayAnyWay Webhook received:', { MNT_ID, MNT_TRANSACTION_ID, MNT_OPERATION_ID, MNT_AMOUNT });
 
-        // 1. Проверяем что запрос пришёл для нашего магазина (вместо подписи, т.к. для самозанятых она не поддерживается)
+        // 1. Проверяем что запрос пришёл для нашего магазина
         if (MNT_ID !== PAYANYWAY_MNT_ID) {
             console.error('PayAnyWay Invalid MNT_ID!', { received: MNT_ID, expected: PAYANYWAY_MNT_ID });
             return new NextResponse('FAIL', { status: 400 });
@@ -32,10 +41,10 @@ export async function POST(request: Request) {
             }
         );
 
-        // 3. Получаем данные о заказе из БД (чтобы не зависеть от кастомных полей PayAnyWay)
+        // 3. Получаем данные о заказе из БД
         const { data: paymentInfo, error: fetchError } = await supabaseAdmin
             .from('payments')
-            .select('plan_id, user_id')
+            .select('plan_id, user_id, amount')
             .eq('id', MNT_TRANSACTION_ID)
             .single();
 
@@ -46,6 +55,7 @@ export async function POST(request: Request) {
 
         const plan = paymentInfo.plan_id;
         const userId = paymentInfo.user_id;
+        const amount = paymentInfo.amount;
 
         // 4. Обновляем статус заказа в таблице payments
         await supabaseAdmin
@@ -57,16 +67,14 @@ export async function POST(request: Request) {
         const now = new Date();
         const endDate = new Date(now);
 
-        // FAST Tariffs
         if (plan === '1d') endDate.setDate(now.getDate() + 1);
         else if (plan === '3d') endDate.setDate(now.getDate() + 3);
-        // PRO Tariffs
         else if (plan === '1m') endDate.setMonth(now.getMonth() + 1);
         else if (plan === '3m') endDate.setMonth(now.getMonth() + 3);
         else if (plan === '6m') endDate.setMonth(now.getMonth() + 6);
         else if (plan === '1y') endDate.setFullYear(now.getFullYear() + 1);
 
-        // 5. Обновляем профиль пользователя, выдаем доступ
+        // 6. Обновляем профиль пользователя
         const { error: profileError } = await supabaseAdmin
             .from('profiles')
             .update({
@@ -82,8 +90,27 @@ export async function POST(request: Request) {
             return new NextResponse('FAIL', { status: 500 });
         }
 
-        // 6. Возвращаем SUCCESS (это требование PayAnyWay API, чтобы они поняли, что мы всё обработали)
-        return new NextResponse('SUCCESS', { status: 200 });
+        console.log('PayAnyWay Webhook SUCCESS! User:', userId, 'Plan:', plan);
+
+        // 7. Возвращаем XML с номенклатурой (обязательно для самозанятых — иначе чек не сформируется)
+        const itemName = PLAN_NAMES[plan] || 'Подписка AI Seller Pro';
+        const itemPrice = Number(amount).toFixed(2);
+
+        const xmlResponse = `<?xml version="1.0" encoding="UTF-8"?>
+<MNT_RESPONSE>
+<MNT_RESULT_CODE>200</MNT_RESULT_CODE>
+<MNT_DESCRIPTION>${itemName}</MNT_DESCRIPTION>
+<MNT_ATTRIBUTES>
+<ATTRIBUTE><KEY>ITEM_NAME1</KEY><VALUE>${itemName}</VALUE></ATTRIBUTE>
+<ATTRIBUTE><KEY>ITEM_QUANTITY1</KEY><VALUE>1</VALUE></ATTRIBUTE>
+<ATTRIBUTE><KEY>ITEM_PRICE1</KEY><VALUE>${itemPrice}</VALUE></ATTRIBUTE>
+</MNT_ATTRIBUTES>
+</MNT_RESPONSE>`;
+
+        return new NextResponse(xmlResponse, {
+            status: 200,
+            headers: { 'Content-Type': 'application/xml; charset=utf-8' }
+        });
 
     } catch (error) {
         console.error('PayAnyWay Webhook General Error:', error);
