@@ -41,7 +41,7 @@ export default function Home() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </span>
-            AI Seller Pro — лучший помощник для селлеров
+            AI Seller Pro — интеллектуальный помощник для селлеров
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight">
@@ -75,7 +75,7 @@ export default function Home() {
             <div className="text-sm text-zinc-500 uppercase tracking-wider mt-1">На одно описание</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-white">99%</div>
+            <div className="text-3xl font-bold text-white">Высокая</div>
             <div className="text-sm text-zinc-500 uppercase tracking-wider mt-1">Уникальность текста</div>
           </div>
           <div>
@@ -111,7 +111,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold">Скорость работы</h3>
               <p className="text-zinc-400 leading-relaxed">
-                Забудьте про копирайтеров. Получите готовое, продающее описание за 5-10 секунд.
+                Экономьте на услугах копирайтера. Получите готовое, продающее описание за 5-10 секунд.
               </p>
             </div>
 

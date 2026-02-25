@@ -4,7 +4,7 @@ import Footer from '@/components/Footer'
 
 export const metadata: Metadata = {
   title: 'AI Seller Pro — Генератор SEO-описаний для Wildberries, Ozon, Avito',
-  description: 'AI Seller Pro — лучший нейросетевой генератор описаний товаров. Создавайте продающие SEO-описания для карточек на Wildberries, Ozon, Авито, Яндекс.Маркет за 10 секунд. Искусственный интеллект для селлеров.',
+  description: 'AI Seller Pro — мощный нейросетевой генератор описаний товаров. Создавайте продающие SEO-описания для карточек на Wildberries, Ozon, Авито, Яндекс.Маркет за 10 секунд. Искусственный интеллект для селлеров.',
   keywords: [
     // Основные целевые запросы пользователя
     'AI Seller Pro', 'ai seller pro', 'seller pro', 'генератор описаний',
