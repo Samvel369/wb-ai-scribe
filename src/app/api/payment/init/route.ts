@@ -64,8 +64,8 @@ export async function POST(request: Request) {
         const currency = 'RUB';
         const description = `Подписка AI Seller Pro (${plan})`;
 
-        // 3. Формируем ссылку на оплату БЕЗ подписи (для самозанятых аккаунтов PayAnyWay подпись может быть не поддержана)
-        const payUrl = new URL('https://www.payanyway.ru/assistant.htm');
+        // Формируем ссылку на оплату (self.payanyway.ru — портал для самозанятых)
+        const payUrl = new URL('https://self.payanyway.ru/assistant.htm');
         payUrl.searchParams.set('MNT_ID', PAYANYWAY_MNT_ID || '');
         payUrl.searchParams.set('MNT_TRANSACTION_ID', transactionId);
         payUrl.searchParams.set('MNT_CURRENCY_CODE', currency);
