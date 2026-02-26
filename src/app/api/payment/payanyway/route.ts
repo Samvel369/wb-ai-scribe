@@ -16,22 +16,38 @@ const PLAN_NAMES: Record<string, string> = {
     '1y': 'Подписка AI Seller Pro PRO (1 год)',
 };
 
-export async function POST(request: Request) {
+async function handleRequest(request: Request) {
     try {
-        // PayAnyWay вебхуки приходят в виде x-www-form-urlencoded
-        const formData = await request.formData();
+        let MNT_ID = '';
+        let MNT_TRANSACTION_ID = '';
+        let MNT_OPERATION_ID = '';
+        let MNT_AMOUNT = '';
 
-        const MNT_ID = formData.get('MNT_ID') as string;
-        const MNT_TRANSACTION_ID = formData.get('MNT_TRANSACTION_ID') as string;
-        const MNT_OPERATION_ID = formData.get('MNT_OPERATION_ID') as string;
-        const MNT_AMOUNT = formData.get('MNT_AMOUNT') as string;
+        if (request.method === 'POST') {
+            try {
+                const formData = await request.formData();
+                MNT_ID = formData.get('MNT_ID') as string;
+                MNT_TRANSACTION_ID = formData.get('MNT_TRANSACTION_ID') as string;
+                MNT_OPERATION_ID = formData.get('MNT_OPERATION_ID') as string;
+                MNT_AMOUNT = formData.get('MNT_AMOUNT') as string;
+            } catch (e) {
+                console.error('PayAnyWay Webhook Form Data Error:', e);
+                return new NextResponse('FAIL#1_FORM_DATA_ERROR', { status: 400 });
+            }
+        } else if (request.method === 'GET') {
+            const { searchParams } = new URL(request.url);
+            MNT_ID = searchParams.get('MNT_ID') || '';
+            MNT_TRANSACTION_ID = searchParams.get('MNT_TRANSACTION_ID') || '';
+            MNT_OPERATION_ID = searchParams.get('MNT_OPERATION_ID') || '';
+            MNT_AMOUNT = searchParams.get('MNT_AMOUNT') || '';
+        }
 
-        console.log('PayAnyWay Webhook received:', { MNT_ID, MNT_TRANSACTION_ID, MNT_OPERATION_ID, MNT_AMOUNT });
+        console.log('PayAnyWay Webhook received (Method: ' + request.method + '):', { MNT_ID, MNT_TRANSACTION_ID, MNT_OPERATION_ID, MNT_AMOUNT });
 
         // 1. Проверяем что запрос пришёл для нашего магазина
         if (MNT_ID !== PAYANYWAY_MNT_ID) {
             console.error('PayAnyWay Invalid MNT_ID!', { received: MNT_ID, expected: PAYANYWAY_MNT_ID });
-            return new NextResponse('FAIL', { status: 400 });
+            return new NextResponse('FAIL#2_INVALID_MNT_ID', { status: 400 });
         }
 
         // 2. Инициализируем Admin Client
@@ -52,7 +68,7 @@ export async function POST(request: Request) {
 
         if (fetchError || !paymentInfo) {
             console.error('PayAnyWay Webhook Payment Not Found:', fetchError);
-            return new NextResponse('FAIL', { status: 404 });
+            return new NextResponse('FAIL#3_PAYMENT_NOT_FOUND', { status: 404 });
         }
 
         const plan = paymentInfo.plan_id;
@@ -89,7 +105,7 @@ export async function POST(request: Request) {
 
         if (profileError) {
             console.error('PayAnyWay Webhook Profile Update Error:', profileError);
-            return new NextResponse('FAIL', { status: 500 });
+            return new NextResponse('FAIL#4_PROFILE_UPDATE_ERROR', { status: 500 });
         }
 
         console.log('PayAnyWay Webhook SUCCESS! User:', userId, 'Plan:', plan);
@@ -129,6 +145,14 @@ ${signatureXml}
 
     } catch (error) {
         console.error('PayAnyWay Webhook General Error:', error);
-        return new NextResponse('FAIL', { status: 500 });
+        return new NextResponse('FAIL#5_GENERAL_ERROR', { status: 500 });
     }
+}
+
+export async function POST(request: Request) {
+    return handleRequest(request);
+}
+
+export async function GET(request: Request) {
+    return handleRequest(request);
 }
