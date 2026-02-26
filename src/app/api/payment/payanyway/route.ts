@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 const PAYANYWAY_MNT_ID = process.env.PAYANYWAY_MNT_ID?.trim();
+const PAYANYWAY_MNT_DATAINTEGRITY_CODE = process.env.PAYANYWAY_MNT_DATAINTEGRITY_CODE?.trim();
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
@@ -92,13 +94,26 @@ export async function POST(request: Request) {
 
         console.log('PayAnyWay Webhook SUCCESS! User:', userId, 'Plan:', plan);
 
-        // 7. Возвращаем XML с номенклатурой (обязательно для самозанятых — иначе чек не сформируется)
+        // 7. Формируем подпись для XML-ответа (обязательно, если настроен Код проверки целостности)
+        const resultCode = '200';
+        let signatureXml = '';
+        if (PAYANYWAY_MNT_DATAINTEGRITY_CODE) {
+            // MD5(MNT_RESULT_CODE + MNT_ID + MNT_TRANSACTION_ID + КодПЦД)
+            const strForHash = resultCode + MNT_ID + MNT_TRANSACTION_ID + PAYANYWAY_MNT_DATAINTEGRITY_CODE;
+            const signature = crypto.createHash('md5').update(strForHash).digest('hex').toLowerCase();
+            signatureXml = `<MNT_SIGNATURE>${signature}</MNT_SIGNATURE>`;
+        }
+
+        // 8. Возвращаем правильный XML с номенклатурой
         const itemName = PLAN_NAMES[plan] || 'Подписка AI Seller Pro';
         const itemPrice = Number(amount).toFixed(2);
 
         const xmlResponse = `<?xml version="1.0" encoding="UTF-8"?>
 <MNT_RESPONSE>
-<MNT_RESULT_CODE>200</MNT_RESULT_CODE>
+<MNT_ID>${MNT_ID}</MNT_ID>
+<MNT_TRANSACTION_ID>${MNT_TRANSACTION_ID}</MNT_TRANSACTION_ID>
+<MNT_RESULT_CODE>${resultCode}</MNT_RESULT_CODE>
+${signatureXml}
 <MNT_DESCRIPTION>${itemName}</MNT_DESCRIPTION>
 <MNT_ATTRIBUTES>
 <ATTRIBUTE><KEY>ITEM_NAME1</KEY><VALUE>${itemName}</VALUE></ATTRIBUTE>
