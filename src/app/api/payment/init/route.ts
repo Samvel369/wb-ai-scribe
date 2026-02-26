@@ -71,6 +71,7 @@ export async function POST(request: Request) {
         payUrl.searchParams.set('MNT_CURRENCY_CODE', currency);
         payUrl.searchParams.set('MNT_AMOUNT', amount);
         payUrl.searchParams.set('MNT_DESCRIPTION', description);
+        payUrl.searchParams.set('MNT_SUBSCRIBER_ID', session.user.email || userId); // Передаем email (обязательно для чеков самозанятых)
 
         // Возврат на сайт после успешной оплаты
         const successUrl = `${request.headers.get('origin')}/app?payment_check=true`;
