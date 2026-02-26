@@ -120,10 +120,36 @@ async function handleRequest(request: Request) {
             signatureXml = `<MNT_SIGNATURE>${signature}</MNT_SIGNATURE>`;
         }
 
-        // 8. Возвращаем правильный XML с номенклатурой
+        // Для чека самозанятого: получаем email пользователя из профиля или Auth
+        const { data: userAuth, error: authErr } = await supabaseAdmin.auth.admin.getUserById(userId);
+        const userEmail = userAuth?.user?.email;
+
+        // Если email нет в БД — мы физически не можем пробить чек по 54-ФЗ
+        if (!userEmail) {
+            console.error(`PayAnyWay Webhook Error: Cannot generate receipt. Missing email for user ${userId}`);
+            return new NextResponse('FAIL#6_MISSING_EMAIL_FOR_RECEIPT', { status: 400 });
+        }
+
+        // 8. Формируем обязательный JSON INVENTORY (Номенклатура для кассы)
         const itemName = PLAN_NAMES[plan] || 'Подписка AI Seller Pro';
         const itemPrice = Number(amount).toFixed(2);
 
+        const inventory = JSON.stringify({
+            customer: userEmail,
+            items: [
+                {
+                    name: itemName,
+                    price: parseFloat(itemPrice),
+                    quantity: 1,
+                    amount: parseFloat(itemPrice),
+                    vat: "none",
+                    paymentMethod: "full_prepayment",
+                    paymentObject: "service"
+                }
+            ]
+        });
+
+        // Возвращаем правильный XML с номенклатурой
         const xmlResponse = `<?xml version="1.0" encoding="UTF-8"?>
 <MNT_RESPONSE>
 <MNT_ID>${MNT_ID}</MNT_ID>
@@ -132,9 +158,7 @@ async function handleRequest(request: Request) {
 ${signatureXml}
 <MNT_DESCRIPTION>${itemName}</MNT_DESCRIPTION>
 <MNT_ATTRIBUTES>
-<ATTRIBUTE><KEY>ITEM_NAME1</KEY><VALUE>${itemName}</VALUE></ATTRIBUTE>
-<ATTRIBUTE><KEY>ITEM_QUANTITY1</KEY><VALUE>1</VALUE></ATTRIBUTE>
-<ATTRIBUTE><KEY>ITEM_PRICE1</KEY><VALUE>${itemPrice}</VALUE></ATTRIBUTE>
+<ATTRIBUTE><KEY>INVENTORY</KEY><VALUE><![CDATA[${inventory}]]></VALUE></ATTRIBUTE>
 </MNT_ATTRIBUTES>
 </MNT_RESPONSE>`;
 
