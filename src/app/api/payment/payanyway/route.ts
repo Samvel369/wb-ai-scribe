@@ -134,20 +134,17 @@ async function handleRequest(request: Request) {
         const itemName = PLAN_NAMES[plan] || 'Подписка AI Seller Pro';
         const itemPrice = Number(amount).toFixed(2);
 
-        const inventory = JSON.stringify({
-            customer: userEmail,
-            items: [
-                {
-                    name: itemName,
-                    price: parseFloat(itemPrice),
-                    quantity: 1,
-                    amount: parseFloat(itemPrice),
-                    vat: "none",
-                    paymentMethod: "full_prepayment",
-                    paymentObject: "service"
-                }
-            ]
-        });
+        const inventory = JSON.stringify([
+            {
+                name: itemName,
+                price: parseFloat(itemPrice),
+                quantity: 1,
+                amount: parseFloat(itemPrice),
+                vatTag: 1105, // 1105 = Без НДС (для самозанятых)
+                pm: "full_prepayment",
+                po: "service"
+            }
+        ]);
 
         // Возвращаем правильный XML с номенклатурой
         const xmlResponse = `<?xml version="1.0" encoding="UTF-8"?>
